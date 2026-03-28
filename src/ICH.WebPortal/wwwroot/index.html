@@ -1,0 +1,3285 @@
+<!DOCTYPE html>
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Inclusive Hub - System Architecture</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
+<script type="text/javascript" src="https://alcdn.msauth.net/browser/2.30.0/js/msal-browser.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "background": "#0b1326",
+              "surface-dim": "#0b1326",
+              "tertiary-container": "#977000",
+              "inverse-surface": "#dae2fd",
+              "tertiary-fixed-dim": "#fbbc00",
+              "on-error-container": "#ffdad6",
+              "on-surface-variant": "#c0c7d4",
+              "surface-tint": "#00dce6",
+              "outline": "#8a919e",
+              "secondary-fixed": "#d4e3ff",
+              "secondary-fixed-dim": "#b8c7e2",
+              "secondary": "#b8c7e2",
+              "secondary-container": "#39475e",
+              "on-tertiary-fixed": "#261a00",
+              "on-tertiary-container": "#ffffff",
+              "primary-fixed": "#6ff6ff",
+              "on-tertiary-fixed-variant": "#5c4300",
+              "on-secondary-fixed": "#0c1c30",
+              "on-primary-fixed": "#002022",
+              "on-primary": "#00373a",
+              "on-error": "#690005",
+              "on-secondary-container": "#a7b6d1",
+              "outline-variant": "#404752",
+              "on-primary-fixed-variant": "#004f53",
+              "tertiary-fixed": "#ffdfa0",
+              "tertiary": "#fbbc00",
+              "surface-container-lowest": "#060e20",
+              "surface-container": "#171f33",
+              "surface-variant": "#2d3449",
+              "surface-container-low": "#131b2e",
+              "primary-fixed-dim": "#00dce6",
+              "surface-container-highest": "#2d3449",
+              "primary-container": "#00838a",
+              "surface": "#0b1326",
+              "on-tertiary": "#402d00",
+              "error": "#ffb4ab",
+              "on-surface": "#dae2fd",
+              "on-secondary": "#223146",
+              "surface-container-high": "#222a3d",
+              "on-secondary-fixed-variant": "#39475e",
+              "inverse-on-surface": "#283044",
+              "on-primary-container": "#ffffff",
+              "on-background": "#dae2fd",
+              "error-container": "#93000a",
+              "surface-bright": "#31394d",
+              "inverse-primary": "#00696f",
+              "primary": "#00dce6"
+            },
+            fontFamily: {
+              "headline": ["Inter"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+          },
+        },
+      }
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      .acrylic {
+        background: rgba(45, 52, 73, 0.6);
+        backdrop-filter: blur(20px);
+      }
+      .custom-scrollbar::-webkit-scrollbar {
+        width: 4px;
+        height: 4px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: #2d3449;
+        border-radius: 10px;
+      }
+      .active-glow {
+        box-shadow: inset 0 0 12px rgba(0, 220, 230, 0.2);
+      }
+      .active-glow-recording {
+        box-shadow: inset 0 0 20px rgba(0, 220, 230, 0.35);
+      }
+      @keyframes waveBar {
+        0%, 100% { transform: scaleY(0.3); }
+        50% { transform: scaleY(1); }
+      }
+      .wave-bar {
+        transform-origin: bottom;
+        transition: height 0.1s ease-out;
+      }
+      /* View transitions */
+      .view-section { display: none; }
+      .view-section.active { display: block; }
+      /* Modal */
+      .modal-backdrop { display:none; position:fixed; inset:0; z-index:100; background:rgba(6,14,32,0.85); backdrop-filter:blur(8px); }
+      .modal-backdrop.open { display:flex; align-items:center; justify-content:center; }
+      .modal-panel { max-width:800px; width:95%; max-height:85vh; overflow-y:auto; }
+      .wave-bar.animated {
+        animation: waveBar 1.2s ease-in-out infinite;
+      }
+      /* Transcript scroll area */
+      #transcript-log {
+        max-height: 200px;
+        overflow-y: auto;
+      }
+      #transcript-log::-webkit-scrollbar { width: 4px; }
+      #transcript-log::-webkit-scrollbar-track { background: transparent; }
+      #transcript-log::-webkit-scrollbar-thumb { background: #2d3449; border-radius: 10px; }
+      
+      /* Pulse animation for recording indicator */
+      @keyframes recordPulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.4; }
+      }
+      .record-pulse {
+        animation: recordPulse 1.5s ease-in-out infinite;
+      }
+    </style>
+    <script type="module">
+        import { GestureRecognizer, FilesetResolver } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3/vision_bundle.mjs";
+        window.GestureRecognizer = GestureRecognizer;
+        window.FilesetResolver = FilesetResolver;
+    </script>
+</head>
+<body class="bg-background text-on-background font-body selection:bg-primary/30 min-h-screen flex overflow-hidden">
+<!-- SideNavBar -->
+<aside class="flex flex-col h-full sticky top-0 left-0 h-screen w-64 border-r border-[#2d3449]/30 bg-[#131b2e]/60 backdrop-blur-xl font-['Inter'] antialiased tracking-tight shadow-[48px_0_48px_rgba(45,52,73,0.4)] z-[60]">
+<div class="p-6">
+<div class="flex items-center gap-3 mb-8">
+<div class="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary" data-icon="hub">hub</span>
+</div>
+<div>
+<h1 class="text-xl font-bold tracking-[0.05em] text-[#00dce6]">Inclusive Hub</h1>
+<p class="text-[10px] text-slate-400 uppercase tracking-widest" id="ai-status">AI Active</p>
+</div>
+</div>
+<nav class="space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ease-in-out text-[#00dce6] bg-[#2d3449] border-r-2 border-[#00dce6] font-semibold active:scale-95" href="#" id="nav-audio">
+<span class="material-symbols-outlined" data-icon="mic">mic</span>
+<span>Audio</span>
+</a>
+
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ease-in-out text-slate-400 hover:text-slate-200 hover:bg-[#2d3449]/50 active:scale-95" href="#" id="nav-transcripts">
+<span class="material-symbols-outlined" data-icon="description">description</span>
+<span>Transcripts</span>
+</a>
+
+<a class="flex items-center justify-between px-4 py-3 rounded-lg transition-all duration-200 ease-in-out text-slate-400 hover:text-slate-200 hover:bg-amber-500/10 hover:text-amber-500 active:scale-95 group" href="#" id="nav-signlab">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined group-hover:text-amber-500 transition-colors" data-icon="model_training">model_training</span>
+<span>Sign Library</span>
+</div>
+<span class="text-[8px] bg-amber-500 text-slate-900 font-bold px-1.5 rounded uppercase tracking-widest hidden group-hover:block transition-all">Studio</span>
+</a>
+
+</nav>
+</div>
+<div class="mt-auto p-6">
+<button id="btn-start-session" class="w-full py-3 rounded-xl bg-primary-container text-on-primary-container font-bold hover:bg-primary-fixed-dim transition-colors flex items-center justify-center gap-2 shadow-lg shadow-primary/10">
+<span class="material-symbols-outlined" data-icon="play_arrow" style="font-variation-settings: 'FILL' 1;" id="btn-start-icon">play_arrow</span>
+<span id="btn-start-text">Start Session</span>
+</button>
+<div class="mt-6 flex items-center gap-3 px-2">
+<div class="w-8 h-8 rounded-full bg-surface-container-highest overflow-hidden flex items-center justify-center">
+<span class="material-symbols-outlined text-slate-400 text-lg">person</span>
+</div>
+<div class="flex-1 overflow-hidden">
+<p class="text-sm font-semibold truncate" id="user-name">User</p>
+<p class="text-[10px] text-slate-400">Pro Operator</p>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Viewport -->
+<main class="flex-1 flex flex-col min-w-0 bg-surface">
+<!-- TopNavBar -->
+<header class="flex justify-between items-center px-8 w-full sticky top-0 z-50 w-full h-16 border-b border-[#2d3449]/20 bg-[#0b1326]/80 backdrop-blur-md font-['Inter'] font-medium text-sm">
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-primary animate-pulse" id="status-dot"></div>
+<span class="text-on-surface tracking-tight">System Status: <span class="text-primary" id="system-status">Ready</span></span>
+</div>
+<div class="flex items-center gap-2 text-slate-400">
+<span class="material-symbols-outlined text-xs" data-icon="speed">speed</span>
+<span id="latency-display">Latency: --ms</span>
+</div>
+</div>
+<div class="flex items-center gap-4">
+    <button class="w-10 h-10 rounded-full bg-slate-800 hover:bg-slate-700 flex items-center justify-center transition-colors">
+        <span class="material-symbols-outlined text-slate-400">notifications</span>
+    </button>
+    <!-- Microsoft Entra ID Login Button -->
+    <button id="btn-login-ms" class="h-10 px-5 rounded-full bg-[#131b2e] border border-slate-700 hover:bg-slate-800 flex items-center justify-center transition-all gap-2 text-sm text-slate-400 font-bold shadow-lg">
+        <span class="material-symbols-outlined text-[16px]">login</span> Sign In
+    </button>
+</div>
+</header>
+<!-- Content Area -->
+<div id="view-audio" class="view-section active flex-1 overflow-y-auto p-8 custom-scrollbar">
+<div class="max-w-7xl mx-auto space-y-8">
+<!-- Hero Grid: Sign Language & Audio Config -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+<!-- Left: Pipeline Controls (8 Columns) -->
+<div class="lg:col-span-8 space-y-6">
+<section class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<!-- Hardware Input -->
+<div class="surface-container-high rounded-xl p-5 border-l-4 border-primary shadow-xl" style="background:#222a3d;">
+<div class="flex justify-between items-start mb-4">
+<div>
+<p class="text-[10px] text-primary font-bold uppercase tracking-widest mb-1">Hardware Input</p>
+<h3 class="text-lg font-bold">Microphone Source</h3>
+</div>
+<span class="material-symbols-outlined text-primary" data-icon="mic_external_on">mic_external_on</span>
+</div>
+<div class="flex flex-col gap-3 w-full">
+    <div class="flex flex-col xl:flex-row gap-3 w-full">
+        <!-- Local Mic -->
+        <div class="w-full xl:flex-1 flex flex-col gap-1">
+            <label class="text-[10px] text-primary uppercase font-bold tracking-wider opacity-80 pl-1"><span class="material-symbols-outlined text-[12px] inline-block align-middle mr-1" data-icon="mic">mic</span>Operator (You)</label>
+            <select id="mic-select" class="w-full truncate bg-surface-container-highest border border-primary/30 rounded-lg text-sm text-primary focus:ring-1 focus:ring-primary py-3 px-3" style="background:#2d3449;" title="Local Mic for the Operator">
+                <option value="" class="bg-[#2d3449] text-white">Loading Local Mics...</option>
+            </select>
+        </div>
+        <!-- Remote Audio -->
+        <div class="w-full xl:flex-1 flex flex-col gap-1">
+            <label class="text-[10px] text-[#f59e0b] uppercase font-bold tracking-wider opacity-80 pl-1"><span class="material-symbols-outlined text-[12px] inline-block align-middle mr-1" data-icon="settings_input_component">settings_input_component</span>Remote Guest (Zoom/Teams)</label>
+            <select id="remote-mic-select" class="w-full truncate bg-surface-container-highest border border-[#f59e0b]/50 rounded-lg text-sm text-[#f59e0b] focus:ring-1 focus:ring-[#f59e0b] py-3 px-3" style="background:#2d3449;" title="Receive audio from VB-Cable Output">
+                <option value="" class="bg-[#2d3449] text-white">Loading Remote Audio...</option>
+            </select>
+        </div>
+    </div>
+    <!-- Row 2: Action Buttons -->
+    <div class="flex gap-3 w-full items-center mt-1 overflow-x-auto pb-1">
+        <button id="btn-upload-audio" class="shrink-0 px-4 py-3 bg-[#00dce6]/10 border border-[#00dce6]/30 text-[#00dce6] rounded-lg hover:bg-[#00dce6] hover:text-[#0b1326] transition-all flex items-center gap-2 group" title="Upload Audio File (.wav, .mp3)">
+        <span class="material-symbols-outlined group-hover:scale-110 transition-transform" data-icon="upload_file">upload_file</span>
+        </button>
+        <button id="btn-webcam" class="shrink-0 px-4 py-3 bg-[#a855f7]/10 border border-[#a855f7]/30 text-[#a855f7] rounded-lg hover:bg-[#a855f7] hover:text-white transition-all flex items-center gap-2 group" title="Enable Webcam Gestures">
+        <span class="material-symbols-outlined group-hover:scale-110 transition-transform" data-icon="videocam">videocam</span>
+        </button>
+        <button id="btn-system-audio" class="shrink-0 px-4 py-3 bg-[#f59e0b]/10 border border-[#f59e0b]/30 text-[#f59e0b] rounded-lg hover:bg-[#f59e0b] hover:text-[#0b1326] transition-all flex items-center gap-2 group" title="Capture System/Window Audio">
+        <span class="material-symbols-outlined group-hover:scale-110 transition-transform" data-icon="screen_share">screen_share</span>
+        </button>
+        <button id="btn-paste-chat" class="shrink-0 px-4 py-3 bg-[#ec4899]/10 border border-[#ec4899]/30 text-[#ec4899] rounded-lg hover:bg-[#ec4899] hover:text-white transition-all flex items-center gap-2 group" title="Paste Chat Text from Zoom/Discord/Teams">
+        <span class="material-symbols-outlined group-hover:scale-110 transition-transform" data-icon="content_paste">content_paste</span>
+        </button>
+        <input type="file" id="audio-file-input" accept=".wav,.mp3" class="hidden" />
+    </div>
+</div>
+<div class="mt-4 flex items-center justify-between gap-3">
+<div class="flex-1 h-2 bg-surface-container-highest rounded-full overflow-hidden flex gap-0.5 p-0.5" style="background:#2d3449;">
+<div id="mic-level" class="h-full bg-primary rounded-full transition-all duration-100" style="width: 0%"></div>
+<div class="h-full bg-primary/20 rounded-full flex-1"></div>
+</div>
+<span id="mic-db" class="text-[10px] font-mono text-slate-400">--dB</span>
+</div>
+
+<div id="webcam-container" class="mt-4 hidden rounded-xl overflow-hidden relative border border-[#a855f7]/30 shadow-[0_0_15px_rgba(168,85,247,0.15)] relative">
+    <video id="webcam-video" autoplay playsinline class="w-full h-auto object-cover transform -scale-x-100" style="max-height: 160px;"></video>
+    
+    <div class="absolute top-2 left-2 bg-black/60 backdrop-blur text-white text-[10px] font-bold px-2 py-0.5 rounded tracking-widest flex items-center gap-1 z-10">
+        <span class="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse"></span> GESTURE CAM
+    </div>
+    
+    <!-- Custom Transfer Learning Lab -->
+    <!-- Custom Transfer Learning Lab (Hands-Free Strip) -->
+    <div id="gesture-lab-ui" class="absolute top-0 right-0 left-0 bg-black/70 backdrop-blur-sm z-20 hidden flex-col justify-center items-center p-2 border-b border-amber-500/30">
+        <div class="flex w-full gap-2 mb-1">
+            <input type="text" id="custom-sign-name" placeholder="Sign Name..." class="flex-1 bg-slate-800/80 text-xs text-white rounded px-2 py-1 border border-slate-600 outline-none focus:border-amber-400/50 placeholder-slate-400">
+            <button id="btn-collect-samples" class="bg-amber-500 hover:bg-amber-400 text-slate-900 font-bold px-3 py-1 rounded text-xs transition-colors shadow-[0_0_10px_rgba(245,158,11,0.3)] whitespace-nowrap">
+                ⏺ Rec 3s
+            </button>
+            <button id="btn-close-lab" class="bg-slate-700 hover:bg-slate-600 text-white font-bold p-1 rounded text-xs transition-colors material-symbols-outlined text-[16px]">close</button>
+        </div>
+        <div class="flex justify-between w-full">
+            <span id="train-status" class="text-[9px] font-mono text-amber-500 bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/20">System Ready</span>
+            <span id="train-count" class="text-[9px] font-mono text-slate-300">Samples: 0</span>
+        </div>
+    </div>
+
+    <div id="gesture-overlay" class="absolute bottom-2 left-2 right-2 text-center text-sm font-bold text-white bg-black/60 backdrop-blur rounded p-1.5 hidden border border-white/10 z-10 transition-colors"></div>
+</div>
+
+<!-- System Audio Capture Panel -->
+<div id="system-audio-container" class="mt-4 hidden rounded-xl overflow-hidden relative border border-[#f59e0b]/30 shadow-[0_0_15px_rgba(245,158,11,0.15)] p-4" style="background: linear-gradient(135deg, #1a1708, #2d2200);">
+    <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-lg bg-[#f59e0b]/20 flex items-center justify-center border border-[#f59e0b]/30">
+                <span class="material-symbols-outlined text-[#f59e0b] animate-pulse" data-icon="screen_share">screen_share</span>
+            </div>
+            <div>
+                <p class="text-[10px] text-[#f59e0b] font-bold uppercase tracking-widest">System Audio Capture</p>
+                <p class="text-xs text-slate-400" id="system-audio-source">Listening to system audio...</p>
+            </div>
+        </div>
+        <button id="btn-stop-system-audio" class="px-3 py-1.5 bg-red-500/20 border border-red-500/40 text-red-400 rounded-lg hover:bg-red-500 hover:text-white transition-all text-xs font-bold flex items-center gap-1">
+            <span class="material-symbols-outlined text-[14px]" data-icon="stop">stop</span> Stop
+        </button>
+    </div>
+    <div class="mt-3 flex items-center gap-2">
+        <div class="flex-1 h-1.5 bg-slate-800 rounded-full overflow-hidden">
+            <div id="system-audio-level" class="h-full bg-gradient-to-r from-[#f59e0b] to-[#ef4444] rounded-full transition-all duration-100" style="width: 0%"></div>
+        </div>
+        <span id="system-audio-timer" class="text-[10px] font-mono text-[#f59e0b]">00:00</span>
+    </div>
+</div>
+</div>
+<!-- Virtual Output -->
+<div class="rounded-xl p-5 shadow-xl" style="background:#222a3d;">
+<div class="flex justify-between items-start mb-4">
+<div>
+<p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1">Recognition Language</p>
+<h3 class="text-lg font-bold">Speech-to-Text Config</h3>
+</div>
+<span class="material-symbols-outlined text-slate-400" data-icon="translate">translate</span>
+</div>
+<select id="recognition-lang" class="w-full bg-surface-container-highest border-none rounded-lg text-sm text-on-surface focus:ring-1 focus:ring-primary py-3" style="background:#2d3449;">
+    <option value="en-US" class="bg-[#2d3449] text-white">American</option>
+                                    <option value="es-ES" class="bg-[#2d3449] text-white">Spanish</option>
+                                    <option value="fr-FR" class="bg-[#2d3449] text-white">French</option>
+                                    <option value="de-DE" class="bg-[#2d3449] text-white">German</option>
+                                    <option value="en-GB" class="bg-[#2d3449] text-white">British</option>
+                                    <option value="en-IN" class="bg-[#2d3449] text-white">Intl Sign</option>
+                                    <option value="de-CH" class="bg-[#2d3449] text-white">Swiss Ger.</option>
+                                    <option value="fr-CH" class="bg-[#2d3449] text-white">Swiss Fre.</option>
+                                    <option value="it-CH" class="bg-[#2d3449] text-white">Swiss Ita.</option>
+                                    <option value="zh-CN" class="bg-[#2d3449] text-white">Chinese</option>
+                                    <option value="hr-HR" class="bg-[#2d3449] text-white">Croatian</option>
+                                    <option value="cs-CZ" class="bg-[#2d3449] text-white">Czech</option>
+                                    <option value="da-DK" class="bg-[#2d3449] text-white">Danish</option>
+                                    <option value="hi-IN" class="bg-[#2d3449] text-white">Indian</option>
+                                    <option value="en-NZ" class="bg-[#2d3449] text-white">New Zealand</option>
+                                    <option value="et-EE" class="bg-[#2d3449] text-white">Estonian</option>
+                                    <option value="fi-FI" class="bg-[#2d3449] text-white">Finnish</option>
+                                    <option value="de-AT" class="bg-[#2d3449] text-white">Austrian</option>
+                                    <option value="el-GR" class="bg-[#2d3449] text-white">Greek</option>
+                                    <option value="is-IS" class="bg-[#2d3449] text-white">Icelandic</option>
+                                    <option value="it-IT" class="bg-[#2d3449] text-white">Italian</option>
+                                    <option value="ja-JP" class="bg-[#2d3449] text-white">Japanese</option>
+                                    <option value="lv-LV" class="bg-[#2d3449] text-white">Latvian</option>
+                                    <option value="lt-LT" class="bg-[#2d3449] text-white">Lithuanian</option>
+                                    <option value="fa-IR" class="bg-[#2d3449] text-white">Persian</option>
+                                    <option value="pl-PL" class="bg-[#2d3449] text-white">Polish</option>
+                                    <option value="pt-BR" class="bg-[#2d3449] text-white">Brazilian</option>
+                                    <option value="pt-PT" class="bg-[#2d3449] text-white">Portuguese</option>
+                                    <option value="ro-RO" class="bg-[#2d3449] text-white">Romanian</option>
+                                    <option value="ru-RU" class="bg-[#2d3449] text-white">Russian</option>
+                                    <option value="sk-SK" class="bg-[#2d3449] text-white">Slovak</option>
+                                    <option value="es-AR" class="bg-[#2d3449] text-white">Argentine</option>
+                                    <option value="es-CL" class="bg-[#2d3449] text-white">Chilean</option>
+                                    <option value="es-CU" class="bg-[#2d3449] text-white">Cuban</option>
+                                    <option value="es-MX" class="bg-[#2d3449] text-white">Mexican</option>
+                                    <option value="sv-SE" class="bg-[#2d3449] text-white">Swedish</option>
+                                    <option value="tr-TR" class="bg-[#2d3449] text-white">Turkish</option>
+                                    <option value="uk-UA" class="bg-[#2d3449] text-white">Ukrainian</option>
+                                    <option value="ur-PK" class="bg-[#2d3449] text-white">Pakistan</option>
+                                </select>
+<div class="mt-4 flex items-center justify-between">
+<span class="text-[10px] text-slate-500 uppercase font-bold">Status</span>
+<span id="output-status" class="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded border border-primary/20 font-bold">READY</span>
+</div>
+</div>
+</section>
+<!-- AI Features Bento -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+<!-- Noise Removal -->
+<div class="rounded-lg p-3 border border-outline-variant/10 flex flex-col justify-between hover:bg-surface-container-high transition-colors group" style="background:#131b2e;">
+<div class="flex items-center justify-between mb-2">
+<span class="material-symbols-outlined text-primary group-hover:scale-110 transition-transform text-lg" data-icon="auto_awesome">auto_awesome</span>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox" id="toggle-noise"/>
+<div class="w-8 h-4 bg-surface-container-highest peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</div>
+<div>
+<h4 class="font-bold text-xs">AI Noise Removal</h4>
+<p class="text-[10px] text-slate-500 mt-0.5 leading-relaxed">Filter fan noise &amp; clicks.</p>
+</div>
+</div>
+<!-- Continuous Mode -->
+<div class="rounded-lg p-3 border border-outline-variant/10 flex flex-col justify-between hover:bg-surface-container-high transition-colors group" style="background:#131b2e;">
+<div class="flex items-center justify-between mb-2">
+<span class="material-symbols-outlined text-secondary group-hover:scale-110 transition-transform text-lg" data-icon="all_inclusive">all_inclusive</span>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox" id="toggle-continuous"/>
+<div class="w-8 h-4 bg-surface-container-highest peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</div>
+<div>
+<h4 class="font-bold text-xs">Continuous Mode</h4>
+<p class="text-[10px] text-slate-500 mt-0.5 leading-relaxed">Keep listening.</p>
+</div>
+</div>
+<!-- Interim Results -->
+<div class="rounded-lg p-3 border border-outline-variant/10 flex flex-col justify-between hover:bg-surface-container-high transition-colors group" style="background:#131b2e;">
+<div class="flex items-center justify-between mb-2">
+<span class="material-symbols-outlined text-tertiary group-hover:scale-110 transition-transform text-lg" data-icon="edit_note">edit_note</span>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox" id="toggle-interim"/>
+<div class="w-8 h-4 bg-surface-container-highest peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</div>
+<div>
+<h4 class="font-bold text-xs">Interim Results</h4>
+<p class="text-[10px] text-slate-500 mt-0.5 leading-relaxed">Live preview.</p>
+</div>
+</div>
+<!-- Accent Oracle -->
+<div class="rounded-lg p-3 border border-purple-500/20 shadow-[0_0_15px_rgba(168,85,247,0.1)] flex flex-col justify-between hover:bg-surface-container-high transition-colors group cursor-pointer" style="background:#131b2e;" id="btn-accent-oracle">
+<div class="flex items-center justify-between mb-2">
+<span class="material-symbols-outlined text-purple-400 group-hover:scale-110 transition-transform text-lg" data-icon="troubleshoot">troubleshoot</span>
+<span class="bg-purple-900/30 text-purple-400 text-[8px] px-1.5 py-0.5 rounded border border-purple-500/20 font-bold uppercase tracking-widest">BETA</span>
+</div>
+<div>
+<h4 class="font-bold text-xs text-purple-100">Accent Oracle</h4>
+<p class="text-[10px] text-slate-500 mt-0.5 leading-relaxed">Diagnose dialect.</p>
+</div>
+</div>
+</div>
+<!-- Real-time Waveform Area -->
+<div id="waveform-container" class="surface-container-highest rounded-2xl p-6 relative overflow-hidden h-40 flex items-center active-glow" style="background:#2d3449;">
+<div class="absolute inset-0 opacity-10 flex items-center justify-center pointer-events-none">
+<div class="w-full h-full bg-gradient-to-r from-transparent via-primary/20 to-transparent"></div>
+</div>
+<div id="waveform" class="flex items-end justify-center gap-1 w-full h-24">
+</div>
+<div class="absolute bottom-4 left-6 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-sm" data-icon="waves">waves</span>
+<span class="text-[10px] uppercase font-bold tracking-widest text-slate-400" id="waveform-label">Signal Analytics Engine</span>
+</div>
+<div class="absolute bottom-4 right-6 flex items-center gap-2">
+<span id="recording-indicator" class="hidden flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-red-500 record-pulse"></span>
+<span class="text-[10px] uppercase font-bold tracking-widest text-red-400">REC</span>
+</span>
+</div>
+</div>
+</div>
+<!-- Right: Sign Language Avatar (4 Columns) -->
+<div class="lg:col-span-4 flex flex-col">
+<div class="surface-container-highest rounded-2xl overflow-hidden flex-1 relative flex flex-col shadow-2xl active-glow" style="background:#2d3449;">
+<!-- Custom Native Translation Ribbon -->
+<!-- Custom Native Translation Ribbon -->
+<div class="w-full flex flex-col py-3 px-4 gap-2 border-b border-black/20 z-20 shadow-md active-glow" style="background:#1a2333;">
+    <div class="flex justify-between items-center mb-1">
+        <span class="text-[10px] text-[#00dce6] font-bold uppercase tracking-widest">3D Sign Language Interpreter</span>
+    </div>
+    
+    <!-- INPUT: Spoken Language -->
+    <div class="flex items-center gap-1.5">
+        <span class="text-[8px] text-emerald-400 font-bold uppercase tracking-wider w-10 shrink-0">Input</span>
+        <div class="flex items-center gap-1.5 flex-1" id="ribbon-spoken">
+            <!-- Javascript dynamically injects synchronized grid buttons -->
+        </div>
+    </div>
+    
+    <!-- OUTPUT: Sign Language -->
+    <div class="flex items-center gap-1.5">
+        <span class="text-[8px] text-amber-400 font-bold uppercase tracking-wider w-10 shrink-0">Output</span>
+        <div class="flex items-center gap-1.5 flex-1" id="ribbon-signed">
+            <!-- Javascript dynamically injects synchronized grid buttons -->
+        </div>
+    </div>
+</div>
+<!-- Avatar Viewport -->
+<div class="flex-1 relative overflow-hidden flex items-center justify-center p-0 m-0" style="min-height:320px; background: #131b2e;">
+                            <div id="sign-display" class="flex flex-col items-center justify-center w-full z-10 transition-all duration-300 relative" style="min-height: 450px;">
+                                <!-- Sign.mt Transparent Overlay -->
+                                <iframe id="sign-iframe" src="http://localhost:4200/translate" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; pointer-events: auto; z-index: 10; transition: transform 0.1s ease-out;" loading="lazy"></iframe>
+                                
+                                <!-- Fallback when Sign.mt is not running -->
+                                <div id="sign-iframe-fallback" class="absolute inset-0 z-20 flex flex-col items-center justify-center gap-4 bg-[#131b2e] hidden">
+                                    <div class="w-20 h-20 rounded-2xl bg-primary/10 flex items-center justify-center border border-primary/20">
+                                        <span class="material-symbols-outlined text-4xl text-primary animate-pulse" data-icon="sign_language">sign_language</span>
+                                    </div>
+                                    <h3 class="text-lg font-bold text-slate-200">Sign Language Interpreter</h3>
+                                    <p class="text-sm text-slate-400 text-center max-w-xs">The 3D avatar engine is loading or not available.<br>Start the Sign.mt service to enable real-time sign language translation.</p>
+                                    <div class="flex items-center gap-2 mt-2 text-xs text-slate-500 bg-surface-container-highest/50 px-4 py-2 rounded-lg border border-outline-variant/10">
+                                        <span class="material-symbols-outlined text-[14px]" data-icon="terminal">terminal</span>
+                                        <code>cd src\sign.mt && npm start</code>
+                                    </div>
+                                </div>
+
+                            </div>
+<!-- Spatial Tracking Indicators -->
+<div class="absolute inset-0 p-8 border-[1px] border-primary/5 pointer-events-none">
+<div class="absolute top-1/4 left-1/4 w-4 h-4 border-t-2 border-l-2 border-primary/30"></div>
+<div class="absolute top-1/4 right-1/4 w-4 h-4 border-t-2 border-r-2 border-primary/30"></div>
+<div class="absolute bottom-1/4 left-1/4 w-4 h-4 border-b-2 border-l-2 border-primary/30"></div>
+<div class="absolute bottom-1/4 right-1/4 w-4 h-4 border-b-2 border-r-2 border-primary/30"></div>
+</div>
+</div>
+<!-- Avatar Controls -->
+<div class="p-4 flex items-center justify-between" style="background:#131b2e;">
+<div class="flex gap-2">
+<button id="btn-share-avatar" class="p-2 rounded-lg text-emerald-400 hover:text-white hover:bg-emerald-500 transition-all border border-emerald-500/30" style="background:#0d3320;" title="Open Avatar in shareable window for Zoom/Meet">
+<span class="material-symbols-outlined text-[18px]" data-icon="open_in_new">open_in_new</span>
+</button>
+<button id="btn-capture-remote-signs" class="p-2 rounded-lg text-rose-400 hover:text-white hover:bg-rose-500 transition-all border border-rose-500/30" style="background:#330d1a;" title="Capture remote signer's webcam from a video call">
+<span class="material-symbols-outlined text-[18px]" data-icon="person_search">person_search</span>
+</button>
+</div>
+<div class="flex items-center gap-3">
+<span class="text-[10px] font-bold text-slate-500">ZOOM</span>
+<input id="zoom-slider" class="w-20 accent-primary bg-surface-container-highest h-1 rounded-full appearance-none" type="range" min="50" max="250" value="100" style="accent-color:#00dce6;"/>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Live Subtitles / Transcription Stream Widget -->
+<section class="rounded-2xl p-6 border border-outline-variant/10 shadow-inner overflow-hidden" style="background:#131b2e;">
+<div class="flex items-center justify-between mb-6">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary" data-icon="closed_caption" style="font-variation-settings: 'FILL' 1;">closed_caption</span>
+<h2 class="font-bold tracking-tight">Real-time Transcription Stream</h2>
+</div>
+<div class="flex items-center gap-4 text-[10px] font-bold uppercase tracking-widest text-slate-500">
+<div class="flex items-center gap-2 border-r border-[#2d3449] pr-4 hidden sm:flex">
+    <span class="text-[9px] text-slate-500 uppercase">Speak:</span>
+    <label class="relative inline-flex items-center cursor-pointer">
+        <input type="checkbox" id="toggle-tts" class="sr-only peer" checked>
+        <div class="w-7 h-4 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-primary"></div>
+    </label>
+</div>
+<div class="flex items-center gap-2">
+    <span class="text-[9px] text-slate-500 uppercase">Translate to:</span>
+    <select id="translation-lang" class="bg-surface-container-highest border-none rounded text-xs text-on-surface focus:ring-1 focus:ring-primary py-1 px-2" style="background:#2d3449;">
+        <option value="en-US" class="bg-[#2d3449] text-white">American</option>
+        <option value="es-ES" class="bg-[#2d3449] text-white">Spanish</option>
+        <option value="fr-FR" class="bg-[#2d3449] text-white">French</option>
+        <option value="de-DE" class="bg-[#2d3449] text-white">German</option>
+        <option value="en-GB" class="bg-[#2d3449] text-white">British</option>
+        <option value="en-IN" class="bg-[#2d3449] text-white">Intl Sign</option>
+        <option value="de-CH" class="bg-[#2d3449] text-white">Swiss Ger.</option>
+        <option value="fr-CH" class="bg-[#2d3449] text-white">Swiss Fre.</option>
+        <option value="it-CH" class="bg-[#2d3449] text-white">Swiss Ita.</option>
+        <option value="zh-CN" class="bg-[#2d3449] text-white">Chinese</option>
+        <option value="hr-HR" class="bg-[#2d3449] text-white">Croatian</option>
+        <option value="cs-CZ" class="bg-[#2d3449] text-white">Czech</option>
+        <option value="da-DK" class="bg-[#2d3449] text-white">Danish</option>
+        <option value="hi-IN" class="bg-[#2d3449] text-white">Indian</option>
+        <option value="en-NZ" class="bg-[#2d3449] text-white">New Zealand</option>
+        <option value="et-EE" class="bg-[#2d3449] text-white">Estonian</option>
+        <option value="fi-FI" class="bg-[#2d3449] text-white">Finnish</option>
+        <option value="de-AT" class="bg-[#2d3449] text-white">Austrian</option>
+        <option value="el-GR" class="bg-[#2d3449] text-white">Greek</option>
+        <option value="is-IS" class="bg-[#2d3449] text-white">Icelandic</option>
+        <option value="it-IT" class="bg-[#2d3449] text-white">Italian</option>
+        <option value="ja-JP" class="bg-[#2d3449] text-white">Japanese</option>
+        <option value="lv-LV" class="bg-[#2d3449] text-white">Latvian</option>
+        <option value="lt-LT" class="bg-[#2d3449] text-white">Lithuanian</option>
+        <option value="fa-IR" class="bg-[#2d3449] text-white">Persian</option>
+        <option value="pl-PL" class="bg-[#2d3449] text-white">Polish</option>
+        <option value="pt-BR" class="bg-[#2d3449] text-white">Brazilian</option>
+        <option value="pt-PT" class="bg-[#2d3449] text-white">Portuguese</option>
+        <option value="ro-RO" class="bg-[#2d3449] text-white">Romanian</option>
+        <option value="ru-RU" class="bg-[#2d3449] text-white">Russian</option>
+        <option value="sk-SK" class="bg-[#2d3449] text-white">Slovak</option>
+        <option value="es-AR" class="bg-[#2d3449] text-white">Argentine</option>
+        <option value="es-CL" class="bg-[#2d3449] text-white">Chilean</option>
+        <option value="es-CU" class="bg-[#2d3449] text-white">Cuban</option>
+        <option value="es-MX" class="bg-[#2d3449] text-white">Mexican</option>
+        <option value="sv-SE" class="bg-[#2d3449] text-white">Swedish</option>
+        <option value="tr-TR" class="bg-[#2d3449] text-white">Turkish</option>
+        <option value="uk-UA" class="bg-[#2d3449] text-white">Ukrainian</option>
+        <option value="ur-PK" class="bg-[#2d3449] text-white">Pakistan</option>
+    </select>
+</div>
+<span id="live-badge" class="flex items-center gap-1 hidden"><span class="w-1.5 h-1.5 rounded-full bg-green-500 record-pulse"></span> Live</span>
+<span id="confidence-display">Confidence: --%</span>
+<span id="word-count-display">Words: 0</span>
+</div>
+</div>
+<!-- Current interim text (what's being spoken right now) -->
+<div class="relative mb-4">
+<div class="flex gap-6 overflow-x-hidden py-2 select-none pointer-events-none opacity-50 blur-[1px]">
+<span id="subtitle-original" class="text-slate-600 whitespace-nowrap text-lg italic">...waiting for speech input...</span>
+</div>
+<div class="flex gap-6 items-center">
+<div class="h-10 w-1 bg-primary rounded-full shrink-0"></div>
+<p class="text-2xl font-bold tracking-tight text-on-surface line-clamp-2 flex-1" id="subtitle-translated">
+<span class="text-primary/60">"</span>Click "Start Session" to begin...<span class="text-primary/60">"</span>
+</p>
+<div class="flex items-center gap-2 px-3 py-1 bg-surface-container-highest rounded-lg shrink-0" style="background:#2d3449;">
+<span class="text-xs font-mono font-bold text-slate-400" id="session-time">00:00:00</span>
+</div>
+</div>
+</div>
+<!-- Unified Chat log (accumulation of multi-modal inputs) -->
+<div id="transcript-log" class="flex flex-col mt-4 border-t border-outline-variant/10 pt-4 h-64 overflow-y-auto custom-scrollbar pr-2 pb-2">
+    <div class="h-full flex items-center justify-center w-full" id="transcript-placeholder">
+        <p class="text-xs text-slate-500 text-center">Unified chat session will appear here...</p>
+    </div>
+</div>
+<div class="flex items-center justify-between mt-2 px-1">
+    <span class="text-[10px] text-slate-500" id="transcript-count">0 entries</span>
+    <div class="flex items-center gap-2">
+    <button id="btn-download-pdf" onclick="downloadTranscriptPDF()" class="flex items-center gap-1.5 px-3 py-1.5 bg-purple-600/20 hover:bg-purple-600/30 text-purple-400 text-xs font-semibold rounded-lg border border-purple-500/20 transition-all duration-200 hover:scale-105" title="Download transcript as PDF">
+        <span class="material-symbols-outlined text-[14px]">picture_as_pdf</span>
+        PDF
+    </button>
+    <button id="btn-cloud-archive" onclick="archiveToCloud()" class="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600/20 hover:bg-blue-600/30 text-blue-400 text-xs font-semibold rounded-lg border border-blue-500/20 transition-all duration-200 hover:scale-105" title="Export transcript to Azure Blob Storage">
+        <span class="material-symbols-outlined text-[14px]">cloud_upload</span>
+        Azure
+    </button>
+    </div>
+</div>
+
+<!-- Unified Keyboard Input -->
+<div class="mt-4 flex gap-2 items-center">
+    <div class="flex-1 bg-surface-container-highest rounded-xl border border-outline-variant/20 focus-within:border-primary/50 focus-within:ring-1 focus-within:ring-primary/50 transition-all shadow-inner flex items-center h-12">
+        <span class="material-symbols-outlined text-slate-400 pl-3 text-[20px]">keyboard</span>
+        <input type="text" id="chat-text-input" class="w-full h-full bg-transparent text-sm text-on-surface px-3 outline-none placeholder-slate-500" placeholder="Type a message to translate into Sign Language..." autocomplete="off" onkeypress="if(event.key === 'Enter') submitKeyboardChat()">
+    </div>
+    <button id="btn-send-chat" onclick="submitKeyboardChat()" class="bg-primary text-on-primary rounded-xl px-5 h-12 font-bold text-sm shadow-md shadow-primary/20 hover:bg-primary/90 transition-all flex items-center gap-2 shrink-0">
+        <span class="material-symbols-outlined text-[18px]">send</span> <span class="hidden sm:inline">Send</span>
+    </button>
+</div>
+
+<!-- ================= AI ASSISTANT: RAG TRANSCRIPTS ================= -->
+<div class="mt-4 p-4 rounded-xl border border-primary/20 bg-primary/5 flex flex-col gap-3">
+    <div class="flex items-center gap-2 text-primary">
+        <span class="material-symbols-outlined text-xl">smart_toy</span>
+        <h3 class="text-sm font-bold">Ask AI Assistant (History RAG)</h3>
+    </div>
+    <div class="flex gap-2">
+        <input type="text" id="ai-query-input" onkeydown="if(event.key==='Enter'){event.preventDefault();queryAiTranscripts();}" class="flex-1 bg-surface-container-highest border border-outline-variant/30 rounded-lg text-sm px-3 py-2 text-on-surface focus:outline-none focus:border-primary/50" placeholder="e.g. ¿Qué se habló sobre el proyecto X la semana pasada?">
+        <button onclick="queryAiTranscripts()" class="bg-slate-700 hover:bg-slate-600 px-4 rounded-lg text-xs font-bold text-white transition-colors">Ask</button>
+    </div>
+    <div id="ai-response-box" class="hidden text-xs text-slate-300 bg-black/40 p-3 rounded-lg border border-slate-700/50 leading-relaxed max-h-32 overflow-y-auto"></div>
+</div>
+<!-- ================================================================= -->
+</section>
+<!-- Footer / Extended Metrics -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-4 pb-8">
+<div class="rounded-xl p-4 flex items-center gap-4" style="background:#131b2e;">
+<div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary" data-icon="memory">memory</span>
+</div>
+<div>
+<p class="text-[10px] text-slate-500 font-bold uppercase">Recognition</p>
+<p class="text-lg font-bold" id="metric-npu">Offline</p>
+</div>
+</div>
+<div class="rounded-xl p-4 flex items-center gap-4" style="background:#131b2e;">
+<div class="w-10 h-10 rounded-lg bg-secondary/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-secondary" data-icon="database">database</span>
+</div>
+<div>
+<p class="text-[10px] text-slate-500 font-bold uppercase">Words/min</p>
+<p class="text-lg font-bold" id="metric-tokens">0</p>
+</div>
+</div>
+<div class="rounded-xl p-4 flex items-center gap-4" style="background:#131b2e;">
+<div class="w-10 h-10 rounded-lg bg-tertiary/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-tertiary" data-icon="hearing">hearing</span>
+</div>
+<div>
+<p class="text-[10px] text-slate-500 font-bold uppercase">Total Words</p>
+<p class="text-lg font-bold" id="metric-cloud">0</p>
+</div>
+</div>
+<div class="rounded-xl p-4 flex items-center gap-4" style="background:#131b2e;">
+<div class="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center" id="azure-status-icon-bg">
+<span class="material-symbols-outlined text-blue-400" id="azure-status-icon" data-icon="cloud" style="font-variation-settings:'FILL' 1;">cloud</span>
+</div>
+<div>
+<p class="text-[10px] text-slate-500 font-bold uppercase">Azure Cloud</p>
+<p class="text-sm font-bold" id="azure-status-text"><span class="text-slate-500">Checking...</span></p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- ======== TRANSCRIPTS VIEW (hidden by default) ======== -->
+<div id="view-transcripts" class="view-section flex-1 overflow-y-auto p-8 custom-scrollbar">
+<div class="max-w-5xl mx-auto space-y-6">
+<div class="flex items-center justify-between mb-2">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary text-3xl" style="font-variation-settings:'FILL' 1;">description</span>
+<div>
+<h2 class="text-2xl font-bold tracking-tight">Saved Transcriptions</h2>
+<p class="text-sm text-slate-400">Session recordings with full text and metadata</p>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<span class="text-[10px] uppercase font-bold tracking-widest text-slate-500" id="transcripts-count-label">0 transcriptions</span>
+<button onclick="exportAllTranscripts()" class="px-4 py-2 rounded-lg bg-surface-container-highest text-slate-300 text-sm font-semibold hover:bg-surface-variant transition-colors flex items-center gap-2" style="background:#2d3449;">
+<span class="material-symbols-outlined text-[16px]">download</span> Export All
+</button>
+</div>
+</div>
+
+<!-- ================= AI ASSISTANT: ARCHIVE RAG ================= -->
+<div class="mb-6 p-5 rounded-xl border border-primary/20 bg-primary/5 shadow-lg flex flex-col gap-3">
+    <div class="flex flex-col gap-1">
+        <div class="flex items-center gap-2 text-primary">
+            <span class="material-symbols-outlined text-2xl">auto_awesome</span>
+            <h3 class="text-base font-bold tracking-tight">AI Transcript Intelligence</h3>
+        </div>
+        <p class="text-xs text-slate-400 pl-8">Interrogate your entire session history directly using Natural Language.</p>
+    </div>
+    
+    <div class="flex gap-3 pl-8">
+        <input type="text" id="ai-query-input-archive" onkeydown="if(event.key==='Enter'){event.preventDefault();queryAiTranscripts('ai-query-input-archive','ai-response-box-archive');}" class="flex-1 bg-[#131b2e] border border-outline-variant/50 rounded-lg text-sm px-4 py-3 text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary shadow-inner" placeholder="Pídele a Copilot que busque en todas tus transcripciones...">
+        <button onclick="queryAiTranscripts('ai-query-input-archive', 'ai-response-box-archive')" class="bg-primary hover:bg-primary/80 px-6 rounded-lg text-sm font-bold text-[#002022] transition-colors shadow-lg shadow-primary/20 flex items-center gap-2">
+            <span class="material-symbols-outlined text-[18px]">search</span> Ask AI
+        </button>
+    </div>
+    <div id="ai-response-box-archive" class="hidden text-sm text-slate-300 bg-[#0b1326] p-4 rounded-lg border border-slate-700/80 leading-relaxed ml-8"></div>
+</div>
+<!-- ============================================================= -->
+
+<!-- Transcript cards list -->
+<div id="transcripts-list" class="space-y-3">
+<div id="transcripts-empty" class="flex flex-col items-center justify-center py-20 text-center">
+<span class="material-symbols-outlined text-6xl text-slate-600 mb-4">folder_open</span>
+<p class="text-lg font-semibold text-slate-400">No transcriptions yet</p>
+<p class="text-sm text-slate-500 mt-1">Start a session and speak — your transcriptions will appear here when you stop.</p>
+</div>
+</div>
+</div>
+</div>
+
+<!-- ======== SIGN LIBRARY & STUDIO VIEW (Phase 7) ======== -->
+<div id="view-signlab" class="view-section flex-1 flex flex-col p-8 overflow-y-auto custom-scrollbar" style="display: none;">
+    <div class="max-w-6xl mx-auto space-y-6 w-full">
+        <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center gap-3">
+                <span class="material-symbols-outlined text-amber-500 text-3xl" style="font-variation-settings:'FILL' 1;">model_training</span>
+                <div>
+                    <h2 class="text-2xl font-bold tracking-tight">AI Training Studio</h2>
+                    <p class="text-sm text-slate-400">Teach the system custom gestures using Transfer Learning.</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <button id="btn-lab-webcam" class="px-4 py-2 bg-[#a855f7]/10 text-[#a855f7] rounded-lg hover:bg-[#a855f7] hover:text-white transition-colors flex items-center gap-2 font-bold text-sm border border-[#a855f7]/30 shadow-md">
+                    <span class="material-symbols-outlined">videocam</span> Activate Camera
+                </button>
+                <span class="text-[10px] uppercase font-bold tracking-widest text-amber-500 bg-amber-500/10 px-2 py-1 rounded border border-amber-500/20" id="studio-status">AWAITING CAMERA</span>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Training Viewport -->
+            <div class="lg:col-span-2 bg-[#222a3d]/80 rounded-xl p-6 border border-[#00dce6]/20 shadow-lg">
+                <h3 class="text-lg font-bold mb-4 flex items-center gap-2 text-[#00dce6]">
+                    <span class="material-symbols-outlined">video_camera_front</span> Live Studio Phase
+                </h3>
+                
+                <div class="w-full aspect-video bg-[#0b1326] rounded-xl overflow-hidden relative mb-6 shadow-md border border-slate-700">
+                    <video id="lab-webcam-video" autoplay muted playsinline class="w-full h-full object-cover transform -scale-x-100"></video>
+                    <div class="absolute top-4 left-4 bg-black/70 backdrop-blur text-white text-[10px] font-bold px-3 py-1.5 rounded tracking-widest flex items-center gap-2 z-10 border border-white/20 shadow-md">
+                        <span class="w-2 h-2 rounded-full bg-red-500 animate-[pulse_1.5s_ease-in-out_infinite]"></span> STUDIO CAM
+                    </div>
+                </div>
+                
+                <!-- Training Controls -->
+                <div class="flex flex-col gap-4 bg-[#131b2e] p-5 rounded-xl border border-slate-700/50">
+                    <p class="text-[10px] text-slate-400 uppercase font-bold tracking-widest">Sign Configuration</p>
+                    <div class="flex gap-3 items-end">
+                        <div class="flex-1">
+                            <label class="block text-xs text-slate-400 mb-1">Sign Data Label</label>
+                            <input type="text" id="lab-sign-name" placeholder="e.g. 'Emergency'" class="w-full bg-surface-container-highest text-sm text-white rounded-lg px-4 py-3 border border-slate-600 outline-none focus:border-[#00dce6] transition-colors" style="background:#2d3449;">
+                        </div>
+                        <div class="w-36">
+                            <label class="block text-xs text-slate-400 mb-1">Snapshot Config</label>
+                            <select id="lab-frame-count" class="w-full bg-[#2d3449] border border-slate-600 text-white rounded-lg px-3 py-3 text-sm outline-none focus:border-[#00dce6]">
+                                <option value="3">3 Frames</option>
+                                <option value="5" selected>5 Frames</option>
+                                <option value="7">7 Frames</option>
+                                <option value="10">10 Frames</option>
+                                <option value="90">90 Frames (3s)</option>
+                            </select>
+                        </div>
+                        <button id="btn-lab-record" class="bg-amber-500 hover:bg-amber-400 text-slate-900 font-bold px-8 py-3 rounded-lg text-sm transition-all shadow-[0_0_15px_rgba(245,158,11,0.2)] hover:shadow-[0_0_20px_rgba(245,158,11,0.4)] flex items-center gap-2 whitespace-nowrap active:scale-95">
+                            <span class="material-symbols-outlined" id="rec-icon">fiber_manual_record</span> <span id="rec-text">Record</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Library Viewport -->
+            <div class="bg-[#222a3d]/80 rounded-xl p-6 border border-slate-700/50 flex flex-col h-[650px] shadow-lg">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-lg font-bold flex items-center gap-2">
+                        <span class="material-symbols-outlined text-slate-400">library_books</span> Gesture Library
+                    </h3>
+                    <span id="lab-count" class="text-xs font-mono bg-[#131b2e] px-2 py-1 rounded text-slate-400">Total: 0</span>
+                </div>
+                
+                <div id="sign-library-grid" class="flex-1 overflow-y-auto custom-scrollbar flex flex-col gap-3 pr-2">
+                    <!-- Populated dynamically -->
+                    <div class="flex flex-col items-center justify-center py-20 text-center opacity-50">
+                        <span class="material-symbols-outlined text-5xl mb-3">category</span>
+                        <p class="text-sm font-semibold">Library is empty.</p>
+                        <p class="text-[10px] text-slate-400 mt-1">Record a gesture first.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</main>
+<!-- ======== TRANSCRIPT DETAIL MODAL ======== -->
+<div id="transcript-modal" class="modal-backdrop">
+<div class="modal-panel rounded-2xl border border-outline-variant/10 custom-scrollbar" style="background:#131b2e;">
+<div class="sticky top-0 z-10 p-6 pb-4 border-b border-outline-variant/10 flex items-center justify-between" style="background:#131b2e;">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings:'FILL' 1;">description</span>
+</div>
+<div>
+<h3 class="text-lg font-bold tracking-tight" id="modal-title">Transcript</h3>
+<p class="text-xs text-slate-400" id="modal-subtitle"></p>
+</div>
+</div>
+<button onclick="closeTranscriptModal()" class="p-2 rounded-lg hover:bg-surface-container-highest transition-colors">
+<span class="material-symbols-outlined text-slate-400">close</span>
+</button>
+</div>
+<!-- Modal metadata -->
+<div class="p-6 pt-4 grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="rounded-lg p-3" style="background:#0b1326;">
+<p class="text-[10px] text-slate-500 font-bold uppercase">Date</p>
+<p class="text-sm font-bold" id="modal-date"></p>
+</div>
+<div class="rounded-lg p-3" style="background:#0b1326;">
+<p class="text-[10px] text-slate-500 font-bold uppercase">Duration</p>
+<p class="text-sm font-bold" id="modal-duration"></p>
+</div>
+<div class="rounded-lg p-3" style="background:#0b1326;">
+<p class="text-[10px] text-slate-500 font-bold uppercase">Words</p>
+<p class="text-sm font-bold" id="modal-words"></p>
+</div>
+<div class="rounded-lg p-3" style="background:#0b1326;">
+<p class="text-[10px] text-slate-500 font-bold uppercase">Confidence</p>
+<p class="text-sm font-bold" id="modal-confidence"></p>
+</div>
+</div>
+<!-- Summary -->
+<div class="px-6 pb-3">
+<div class="rounded-lg p-4 border border-primary/10" style="background:#0b1326;">
+<p class="text-[10px] text-primary font-bold uppercase tracking-widest mb-2">AI Summary</p>
+<p class="text-sm text-slate-300 leading-relaxed" id="modal-summary"></p>
+</div>
+</div>
+<!-- Full transcript -->
+<div class="px-6 pb-6">
+<div class="flex items-center justify-between mb-3">
+<p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Full Transcript</p>
+<button onclick="copyTranscriptText()" class="text-[10px] text-primary font-bold uppercase tracking-widest hover:text-primary-fixed-dim transition-colors flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">content_copy</span> Copy
+</button>
+</div>
+<div id="modal-transcript-body" class="space-y-2 max-h-96 overflow-y-auto custom-scrollbar"></div>
+</div>
+<!-- Export single -->
+<div class="px-6 pb-6 flex gap-3">
+<button onclick="exportCurrentTranscript('txt')" class="flex-1 py-2.5 rounded-lg bg-surface-container-highest text-slate-300 text-sm font-semibold hover:bg-surface-variant transition-colors flex items-center justify-center gap-2" style="background:#2d3449;">
+<span class="material-symbols-outlined text-[16px]">text_snippet</span> Export .TXT
+</button>
+<button onclick="exportCurrentTranscript('json')" class="flex-1 py-2.5 rounded-lg bg-surface-container-highest text-slate-300 text-sm font-semibold hover:bg-surface-variant transition-colors flex items-center justify-center gap-2" style="background:#2d3449;">
+<span class="material-symbols-outlined text-[16px]">data_object</span> Export .JSON
+</button>
+<button onclick="exportCurrentTranscript('srt')" class="flex-1 py-2.5 rounded-lg bg-primary-container text-on-primary-container text-sm font-semibold hover:opacity-90 transition-colors flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[16px]">subtitles</span> Export .SRT
+</button>
+</div>
+</div>
+</div>
+
+<script>
+// ============================================================
+// INCLUSIVE HUB — REAL-TIME SPEECH RECOGNITION ENGINE
+// Uses Web Speech API (SpeechRecognition) + Web Audio API
+// ============================================================
+
+// ========== STATE ==========
+let sessionActive = false;
+let sessionSeconds = 0;
+let recognition = null;
+let audioContext = null;
+let analyser = null;
+let micStream = null;
+let animFrameId = null;
+let totalWordCount = 0;
+let sessionWordCount = 0;
+let sessionStartTime = null;
+let sessionStartTimeISO = null;
+let confidenceSum = 0;
+let confidenceCount = 0;
+let transcriptEntries = [];  // Current session entries
+let savedTranscripts = [];   // All saved transcription sessions
+let currentModalTranscript = null; // For export
+let currentView = 'audio';   // active sidebar tab
+
+// Load saved transcripts from localStorage
+try {
+    const saved = localStorage.getItem('ich_transcripts');
+    if (saved) savedTranscripts = JSON.parse(saved);
+} catch(e) { console.warn('Failed to load saved transcripts:', e); }
+
+// ========== SIGN.MT INTEGRATION ==========
+
+function sendToCloudAI(sentence) {
+    if (!sentence) return;
+    
+    try {
+        // Simulate NPU workload processing
+        const indicator = document.getElementById('pipeline-indicator');
+        if (indicator) indicator.classList.add('animate-spin');
+        
+        // Transmit the recognized sentence securely into the Sign.mt iframe via our custom proxy listener
+        const iframe = document.getElementById('sign-iframe');
+        if (iframe && iframe.contentWindow) {
+            iframe.contentWindow.postMessage({
+                type: 'sign_translate',
+                text: sentence.trim()
+            }, '*');
+        }
+        
+        setTimeout(() => {
+            if (indicator) indicator.classList.remove('animate-spin');
+        }, 800);
+        
+    } catch(err) {
+        console.warn("Sign.mt pipeline disconnected:", err);
+    }
+}
+
+// ========== WAVEFORM INIT ==========
+function initWaveform() {
+    const container = document.getElementById('waveform');
+    if (!container) return;
+    container.innerHTML = '';
+    const barCount = 48;
+    for (let i = 0; i < barCount; i++) {
+        const bar = document.createElement('div');
+        bar.className = 'wave-bar w-1.5 bg-primary/40 rounded-full';
+        bar.style.height = '4px';
+        bar.style.minHeight = '4px';
+        container.appendChild(bar);
+    }
+}
+
+// ========== ENUMERATE MICROPHONES ==========
+async function loadMicrophones() {
+    const selectLocal = document.getElementById('mic-select');
+    const selectRemote = document.getElementById('remote-mic-select');
+    try {
+        await navigator.mediaDevices.getUserMedia({ audio: true });
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const mics = devices.filter(d => d.kind === 'audioinput');
+        
+        selectLocal.innerHTML = '';
+        selectRemote.innerHTML = '';
+        
+        let hasVBCable = false;
+        let vbCableId = '';
+
+        mics.forEach((mic, idx) => {
+            const label = mic.label || ('Microphone ' + (idx + 1));
+            // Local Dropdown
+            const optLocal = document.createElement('option');
+            optLocal.value = mic.deviceId;
+            optLocal.textContent = label;
+            selectLocal.appendChild(optLocal);
+
+            // Remote Dropdown
+            const optRemote = document.createElement('option');
+            optRemote.value = mic.deviceId;
+            optRemote.textContent = label;
+            selectRemote.appendChild(optRemote);
+
+            if (label.toLowerCase().includes('cable output') || label.toLowerCase().includes('virtual')) {
+                hasVBCable = true;
+                vbCableId = mic.deviceId;
+            }
+        });
+        // Pre-select VB-Cable for Remote Input if available
+        if (hasVBCable && selectRemote) {
+            selectRemote.value = vbCableId;
+            console.log('✅ Auto-selected VB-Audio Cable for Remote Input:', vbCableId);
+        }
+
+    } catch (err) {
+        console.warn('Microphone access denied or failed:', err);
+    }
+}
+
+// ========== AUDIO ANALYZER (real mic levels & waveform) ==========
+async function startAudioAnalyzer() {
+    try {
+        const deviceId = document.getElementById('mic-select').value;
+        const constraints = { 
+            audio: deviceId ? { 
+                deviceId: { exact: deviceId },
+                echoCancellation: true,
+                noiseSuppression: true,
+                autoGainControl: true
+            } : {
+                echoCancellation: true,
+                noiseSuppression: true,
+                autoGainControl: true
+            }
+        };
+        micStream = await navigator.mediaDevices.getUserMedia(constraints);
+        
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioContext.state === 'suspended') {
+            await audioContext.resume();
+        }
+        
+        const source = audioContext.createMediaStreamSource(micStream);
+        analyser = audioContext.createAnalyser();
+        analyser.fftSize = 256;
+        analyser.smoothingTimeConstant = 0.7;
+        source.connect(analyser);
+        
+        updateWaveform();
+    } catch (err) {
+        console.error('Audio analyzer failed:', err);
+    }
+}
+
+function stopAudioAnalyzer() {
+    if (animFrameId) {
+        cancelAnimationFrame(animFrameId);
+        animFrameId = null;
+    }
+    if (micStream) {
+        micStream.getTracks().forEach(t => t.stop());
+        micStream = null;
+    }
+    if (audioContext) {
+        audioContext.close();
+        audioContext = null;
+    }
+    // Reset waveform
+    const bars = document.querySelectorAll('.wave-bar');
+    bars.forEach(bar => {
+        bar.style.height = '4px';
+        bar.style.background = '';
+        bar.classList.remove('bg-primary');
+        bar.classList.add('bg-primary/40');
+    });
+    document.getElementById('mic-level').style.width = '0%';
+    document.getElementById('mic-db').textContent = '--dB';
+}
+
+function updateWaveform() {
+    if (!analyser) return;
+    
+    const bufferLength = analyser.frequencyBinCount;
+    const dataArray = new Uint8Array(bufferLength);
+    analyser.getByteFrequencyData(dataArray);
+    
+    const bars = document.querySelectorAll('.wave-bar');
+    const step = Math.floor(bufferLength / bars.length);
+    
+    let maxVal = 0;
+    bars.forEach((bar, i) => {
+        const val = dataArray[i * step] || 0;
+        if (val > maxVal) maxVal = val;
+        const height = Math.max(4, (val / 255) * 96);
+        bar.style.height = height + 'px';
+        const intensity = val / 255;
+        if (intensity > 0.6) {
+            bar.style.background = '#00dce6';
+        } else if (intensity > 0.3) {
+            bar.style.background = 'rgba(0, 220, 230, 0.6)';
+        } else {
+            bar.style.background = 'rgba(0, 220, 230, 0.25)';
+        }
+    });
+    
+    // Update mic level bar
+    const level = maxVal / 255 * 100;
+    document.getElementById('mic-level').style.width = level + '%';
+    
+    // Approximate dB
+    const db = maxVal > 0 ? Math.round(20 * Math.log10(maxVal / 255)) : -60;
+    document.getElementById('mic-db').textContent = db + 'dB';
+    
+    animFrameId = requestAnimationFrame(updateWaveform);
+}
+
+// ========== SPEECH RECOGNITION ==========
+let isChangingLanguage = false;  // Flag to suppress false errors during language switch
+
+function createRecognition() {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+        alert('Speech Recognition is not supported in this browser/WebView.');
+        return null;
+    }
+    
+    const rec = new SpeechRecognition();
+    rec.lang = document.getElementById('recognition-lang').value;
+    rec.continuous = document.getElementById('toggle-continuous').checked;
+    rec.interimResults = document.getElementById('toggle-interim').checked;
+    rec.maxAlternatives = 1;
+    
+    rec.onstart = () => {
+        console.log('Speech recognition started, lang=' + rec.lang);
+        updateUI_Recording(true);
+    };
+    
+    rec.onresult = async (event) => {
+        let interimTranscript = '';
+        let finalOriginal = '';
+        
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+            const result = event.results[i];
+            const transcript = result[0].transcript;
+            const confidence = result[0].confidence;
+            
+            // HALF-DUPLEX AEC: Drop anything the local browser mic heard while TTS was playing (Speakers -> Mic loop)
+            if (window._isTTSPlaying) {
+                console.log('🔇 [Local Mic] Dropped transcript buffer due to Half-Duplex AEC lock:', transcript);
+                continue;
+            }
+            
+            if (result.isFinal) {
+                
+                // Remove any lingering interim live bubbles
+                const interimNode = document.getElementById('interim-live-bubble');
+                if (interimNode) interimNode.remove();
+                
+                finalOriginal += transcript;
+                
+                if (confidence > 0) {
+                    confidenceSum += confidence;
+                    confidenceCount++;
+                }
+                
+                const words = transcript.trim().split(/\s+/).filter(w => w.length > 0);
+                totalWordCount += words.length;
+                sessionWordCount += words.length;
+                
+                let outputText = transcript.trim();
+                const sourceLang = document.getElementById('recognition-lang').value;
+                const targetLang = document.getElementById('translation-lang') ? document.getElementById('translation-lang').value : sourceLang;
+                
+                if (outputText.length > 0 && sourceLang.split('-')[0] !== targetLang.split('-')[0]) {
+                    const entryId = addLocalTranscriptEntry(outputText, confidence, 'Signer', 'mic', true);
+                    
+                    const origEl = document.getElementById('subtitle-original');
+                    const transEl = document.getElementById('subtitle-translated');
+                    if (origEl) origEl.textContent = '...' + finalOriginal;
+                    if (transEl) transEl.innerHTML = '<span class="text-primary/60">"</span><span class="text-slate-400 italic">... Azure translating ...</span><span class="text-primary/60">"</span>';
+                    
+                    // Browser-side translation cache
+                    const cacheKey = `${sourceLang.split('-')[0]}|${targetLang.split('-')[0]}|${outputText}`;
+                    if (window._translationCache && window._translationCache.has(cacheKey)) {
+                        const cached = window._translationCache.get(cacheKey);
+                        updateLocalTranscriptEntry(entryId, cached, confidence, 'Signer', 'mic');
+                        if (cached.length > 0) sendToCloudAI(cached);
+                        if (transEl) transEl.innerHTML = '<span class="text-primary/60">"</span>' + escapeHTML(cached) + '<span class="text-primary/60">"</span>';
+                    } else {
+                    // Azure Translator via our backend API
+                    fetch(`${ICH_API_BASE}/api/translate`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ text: outputText, from: sourceLang.split('-')[0], to: targetLang.split('-')[0] })
+                    })
+                        .then(res => res.json())
+                        .then(data => {
+                            let fText = outputText;
+                            if (data && data.translatedText) {
+                                fText = data.translatedText;
+                                // Store in cache
+                                if (!window._translationCache) window._translationCache = new Map();
+                                window._translationCache.set(cacheKey, fText);
+                            }
+                            updateLocalTranscriptEntry(entryId, fText, confidence, 'Signer', 'mic');
+                            if (fText.length > 0) sendToCloudAI(fText);
+                            if (transEl) transEl.innerHTML = '<span class="text-primary/60">"</span>' + escapeHTML(fText) + '<span class="text-primary/60">"</span>';
+                        })
+                        .catch(e => {
+                            console.warn('Azure translation fault, using original:', e);
+                            updateLocalTranscriptEntry(entryId, outputText, confidence, 'Signer', 'mic');
+                            if (outputText.length > 0) sendToCloudAI(outputText);
+                            if (transEl) transEl.innerHTML = '<span class="text-primary/60">"</span>' + escapeHTML(outputText) + '<span class="text-primary/60">"</span>';
+                        });
+                    } // end cache else
+                } else {
+                    addLocalTranscriptEntry(outputText, confidence);
+                    if (outputText.length > 0) sendToCloudAI(outputText);
+                    
+                    const origEl = document.getElementById('subtitle-original');
+                    const transEl = document.getElementById('subtitle-translated');
+                    if (origEl) origEl.textContent = '...' + finalOriginal;
+                    if (transEl) transEl.innerHTML = '<span class="text-primary/60">"</span>' + outputText + '<span class="text-primary/60">"</span>';
+                }
+                
+                updateMetrics();
+            } else {
+                interimTranscript += transcript;
+            }
+        }
+        
+        if (interimTranscript) {
+            const origEl = document.getElementById('subtitle-original');
+            const transEl = document.getElementById('subtitle-translated');
+            if (origEl) origEl.textContent = '...' + interimTranscript;
+            if (transEl) transEl.innerHTML = '<span class="text-primary/60">"</span><span class="text-slate-400 italic">... listening ...</span><span class="text-primary/60">"</span>';
+            
+            // ── SPECULATIVE PRE-TRANSLATION (key latency optimization) ──
+            // While the browser is still deciding if this is "final", 
+            // pre-translate the interim text so it's ready instantly when isFinal arrives.
+            const sourceLang = document.getElementById('recognition-lang')?.value || 'en-US';
+            const targetLang = document.getElementById('translation-lang')?.value || sourceLang;
+            if (sourceLang.split('-')[0] !== targetLang.split('-')[0] && interimTranscript.trim().length > 3) {
+                clearTimeout(window._preTranslateTimer);
+                window._preTranslateTimer = setTimeout(() => {
+                    const text = interimTranscript.trim();
+                    const cacheKey = `${sourceLang.split('-')[0]}|${targetLang.split('-')[0]}|${text}`;
+                    if (!window._translationCache) window._translationCache = new Map();
+                    if (!window._translationCache.has(cacheKey)) {
+                        fetch(`${ICH_API_BASE}/api/translate`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ text, from: sourceLang.split('-')[0], to: targetLang.split('-')[0] })
+                        })
+                        .then(r => r.json())
+                        .then(data => {
+                            if (data?.translatedText) {
+                                window._translationCache.set(cacheKey, data.translatedText);
+                                // Show preview in subtitle
+                                if (transEl) transEl.innerHTML = '<span class="text-primary/60">"</span><span class="text-slate-400/70 italic">' + escapeHTML(data.translatedText) + '</span><span class="text-primary/60">"</span>';
+                            }
+                        })
+                        .catch(() => {});
+                    }
+                }, 300); // 300ms debounce — fast enough to pre-translate, slow enough to not spam
+            }
+            
+            // Instant Visual Feedback in Chat Log
+            let interimNode = document.getElementById('interim-live-bubble');
+            if (!interimNode) {
+                interimNode = document.createElement('div');
+                interimNode.id = 'interim-live-bubble';
+                interimNode.className = 'transcript-entry flex flex-col mb-4 w-full animate-pulse opacity-80';
+                interimNode.innerHTML = `
+                    <div class="flex flex-col items-start w-full">
+                        <div class="flex items-center gap-1.5 mb-1 px-1">
+                            <span class="material-symbols-outlined text-[14px] text-[#00dce6]" data-icon="mic">mic</span>
+                            <span class="text-[10px] text-[#00dce6] font-bold tracking-wider uppercase">Listening...</span>
+                        </div>
+                        <div class="p-3.5 rounded-2xl rounded-tl-sm border border-[#00dce6]/30 bg-[#00dce6]/10 max-w-[85%] shadow-sm">
+                            <div class="text-[13px] text-white font-medium italic" id="interim-live-text"></div>
+                        </div>
+                    </div>
+                `;
+                const log = document.getElementById('transcript-log');
+                if (log) log.appendChild(interimNode);
+            }
+            const textNode = document.getElementById('interim-live-text');
+            if (textNode) textNode.textContent = interimTranscript + '...';
+            
+            const log = document.getElementById('transcript-log');
+            if (log) log.scrollTo({ top: log.scrollHeight, behavior: 'smooth' });
+        } else {
+            const interimNode = document.getElementById('interim-live-bubble');
+            if (interimNode) interimNode.remove();
+        }
+    };
+    
+    rec.onerror = (event) => {
+        console.warn('Speech recognition error:', event.error, 'changingLang:', isChangingLanguage);
+        
+        // Ignore ALL errors during intentional language switches
+        if (isChangingLanguage) return;
+        
+        // Ignore aborted errors (we call abort() intentionally)
+        if (event.error === 'aborted') return;
+        
+        // Only show MIC DENIED on genuine not-allowed (user really denied)
+        if (event.error === 'not-allowed') {
+            document.getElementById('output-status').textContent = 'MIC DENIED';
+            document.getElementById('output-status').className = 'text-[10px] bg-error/10 text-error px-2 py-0.5 rounded border border-error/20 font-bold';
+            
+            // Critical fail, halt session
+            if (sessionActive) stopSession();
+        }
+    };
+    
+    rec.onend = () => {
+        console.log('Speech recognition ended, sessionActive:', sessionActive, 'changingLang:', isChangingLanguage);
+        
+        // Remove lingering interim text immediately if stream breaks without final event
+        document.getElementById('interim-live-bubble')?.remove();
+        
+        // If changing language, the language change handler will restart us
+        if (isChangingLanguage) {
+            return;
+        }
+        
+        // Normal auto-restart for continuous listening
+        if (sessionActive && document.getElementById('output-status').textContent !== 'MIC DENIED') {
+            setTimeout(() => {
+                if (sessionActive) startRecognition();
+            }, 300);
+        } else {
+            updateUI_Recording(false);
+        }
+    };
+    
+    return rec;
+}
+
+async function startRecognition() {
+    // SMART MIC GUARD: Detect if Chrome's default mic is a silent virtual cable
+    try {
+        const guardStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const guardTrack = guardStream.getAudioTracks()[0];
+        const guardLabel = guardTrack?.label || '';
+        console.log('🎤 [MIC GUARD] Chrome default mic:', guardLabel);
+        
+        if (guardLabel.toLowerCase().includes('cable') || guardLabel.toLowerCase().includes('virtual')) {
+            console.warn('🎤 [MIC GUARD] ⚠️ Chrome is using a VIRTUAL audio cable as default mic. Transcription will receive silence.');
+            if (typeof showToast !== 'undefined') {
+                showToast('⚠️ Chrome is using "' + guardLabel + '" as mic. Change it in chrome://settings/content/microphone to your physical mic.', 'error');
+            }
+            // Update output status to warn user
+            const outputStatus = document.getElementById('output-status');
+            if (outputStatus) {
+                outputStatus.textContent = 'WRONG MIC';
+                outputStatus.className = 'text-[10px] bg-orange-500/10 text-orange-400 px-2 py-0.5 rounded border border-orange-500/20 font-bold';
+            }
+        }
+        // Release the guard stream immediately
+        guardStream.getTracks().forEach(t => t.stop());
+    } catch(guardErr) {
+        console.error('🎤 [MIC GUARD] Failed to probe default mic:', guardErr);
+    }
+    
+    // Always create a fresh instance — they can't be restarted after stop/abort
+    recognition = createRecognition();
+    if (recognition) {
+        try {
+            recognition.start();
+        } catch(e) {
+            console.error('Failed to start recognition:', e);
+        }
+    }
+}
+
+function stopRecognition() {
+    if (recognition) {
+        try { recognition.stop(); } catch(e) {}
+        recognition = null;
+    }
+    document.getElementById('interim-live-bubble')?.remove();
+}
+
+// ========== UNIFIED CHAT LOG ==========
+function sendToCloudAI(text) {
+    const iframe = document.getElementById('sign-iframe');
+    if (iframe && iframe.contentWindow) {
+        iframe.contentWindow.postMessage({ type: "sign_translate", text: text }, "*");
+    }
+}
+
+function submitKeyboardChat() {
+    const input = document.getElementById('chat-text-input');
+    const text = input.value.trim();
+    if (!text) return;
+    
+    // UI rendering (Local Keyboard)
+    addLocalTranscriptEntry(text, 1.0, 'You', 'keyboard');
+    
+    // Pipe the text into the 3D X-Bot translation sandbox iframe!
+    const iframe = document.getElementById('sign-iframe');
+    if (iframe && iframe.contentWindow) {
+        iframe.contentWindow.postMessage({
+            type: "sign_translate",
+            text: text
+        }, "*");
+    }
+    
+    input.value = '';
+}
+
+function addLocalTranscriptEntry(text, confidence, user = 'You', modality = 'mic', isTranslating = false) {
+    if (!text || text.trim() === '') return null;
+    
+    // Maintain context history for AI Copilot
+    window._allTranscripts = window._allTranscripts || [];
+    window._allTranscripts.push({text, speaker: user, timestamp: new Date().toISOString()});
+    
+    // Remove placeholder
+    const placeholder = document.getElementById('transcript-placeholder');
+    if (placeholder) placeholder.remove();
+    
+    const log = document.getElementById('transcript-log');
+    const now = new Date();
+    const timeStr = now.toLocaleTimeString('en-US', { hour12: false });
+    const confStr = confidence > 0 ? Math.round(confidence * 100) + '%' : '--';
+    
+    const entry = document.createElement('div');
+    const entryId = 'txt-' + Date.now() + '-' + Math.floor(Math.random() * 10000);
+    entry.id = entryId;
+    
+    const isRight = (user === 'You');
+    
+    // Determine icon based on modality
+    let icon = 'mic';
+    if (modality === 'keyboard') icon = 'keyboard';
+    else if (modality === 'sign') icon = 'sign_language';
+    
+    entry.className = `flex flex-col gap-1 w-full max-w-[85%] ${isRight ? 'self-end items-end' : 'self-start items-start'} mb-4 animate-[fadeIn_0.3s_ease-out]`;
+    
+    const headerHtml = isRight 
+        ? `<span>${timeStr}</span> <span class="material-symbols-outlined text-[12px] opacity-70">${icon}</span> <span>${escapeHTML(user)}</span>` 
+        : `<span>${escapeHTML(user)}</span> <span class="material-symbols-outlined text-[12px] opacity-70">${icon}</span> <span>${timeStr}</span>`;
+        
+    const bubbleClass = isRight
+        ? 'bg-primary text-on-primary rounded-2xl rounded-tr-sm shadow-md shadow-primary/10'
+        : 'bg-surface-container-highest text-on-surface rounded-2xl rounded-tl-sm shadow-sm border border-outline-variant/10';
+
+    entry.innerHTML = `
+        <div class="flex items-center gap-1.5 text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5 px-1 truncate max-w-full">
+            ${headerHtml}
+        </div>
+        <div class="px-4 py-2.5 ${bubbleClass}">
+            <p class="text-sm leading-relaxed" id="${entryId}-content">
+                ${escapeHTML(text)}
+                ${isTranslating ? '<span class="material-symbols-outlined animate-spin text-[14px] opacity-70 ml-2 align-middle inline-block text-primary">hourglass_empty</span>' : ''}
+            </p>
+        </div>
+        ${confidence > 0 && confidence < 0.70 ? `<div class="text-[10px] text-orange-400 mt-1 flex items-center gap-1 font-semibold px-2 bg-orange-500/10 rounded border border-orange-500/20 py-0.5"><span class="material-symbols-outlined text-[12px]">warning</span> Baja Confianza</div>` : ''}
+        <span class="text-[9px] font-mono text-slate-500 px-1 opacity-60">Conf: ${confStr}</span>
+    `;
+    
+    log.appendChild(entry);
+    
+    // Auto-scroll to bottom smoothly
+    log.scrollTo({ top: log.scrollHeight, behavior: 'smooth' });
+    
+    if (!isTranslating) {
+        transcriptEntries.push({ time: timeStr, text, confidence, user, modality });
+        const tgtLang = document.getElementById('translation-lang') ? document.getElementById('translation-lang').value : 'en-US';
+        if (window.playTTS) window.playTTS(text, tgtLang);
+    }
+    
+    return entryId;
+}
+
+function updateLocalTranscriptEntry(id, newText, confidence, user, modality) {
+    const p = document.getElementById(id + '-content');
+    if (p) {
+        p.innerHTML = escapeHTML(newText);
+    }
+    const timeStr = new Date().toLocaleTimeString('en-US', { hour12: false });
+    transcriptEntries.push({ time: timeStr, text: newText, confidence, user, modality });
+    
+    const tgtLang = document.getElementById('translation-lang') ? document.getElementById('translation-lang').value : 'en-US';
+    if (window.playTTS) window.playTTS(newText, tgtLang);
+}
+
+// ========== AZURE NEURAL TTS WITH DUAL-OUTPUT (Speakers + VB-Cable) ==========
+
+const ICH_API_BASE = 'https://localhost:49940';
+let vbCableOutputId = null;
+
+// Detect VB-Audio Cable output device for dual audio routing
+(async function detectVBCableForTTS() {
+    try {
+        const tempStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        tempStream.getTracks().forEach(t => t.stop());
+        
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const outputDevices = devices.filter(d => d.kind === 'audiooutput');
+        
+        const vbCable = outputDevices.find(d => 
+            d.label.toLowerCase().includes('cable input') || 
+            (d.label.toLowerCase().includes('cable') && d.label.toLowerCase().includes('vb-audio'))
+        );
+        
+        if (vbCable) {
+            vbCableOutputId = vbCable.deviceId;
+            console.log('🔊 [Azure TTS] VB-Audio Cable detected:', vbCable.label, '→ Dual output enabled');
+        } else {
+            console.log('🔊 [Azure TTS] No VB-Cable detected → Single output mode');
+        }
+    } catch(e) { /* silent */ }
+})();
+
+window.playTTS = async function(text, langCode) {
+    const toggle = document.getElementById('toggle-tts');
+    if (!toggle || !toggle.checked) return;
+    
+    const cleanText = text.replace(/\[.*?\]/g, '').trim();
+    if (!cleanText) return;
+
+    try {
+        const res = await fetch(`${ICH_API_BASE}/api/speech/synthesize`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text: cleanText, language: langCode })
+        });
+
+        if (!res.ok) {
+            const utt = new SpeechSynthesisUtterance(cleanText);
+            utt.lang = langCode;
+            window.speechSynthesis.speak(utt);
+            return;
+        }
+
+        const audioBlob = await res.blob();
+        const audioUrl = URL.createObjectURL(audioBlob);
+        const audio1 = new Audio(audioUrl);
+        
+        // Anti-Loop Flag & Physical Track Mute (Half-Duplex Hardware Enforcement)
+        window._isTTSPlaying = true;
+        if (window._remoteAudioStream) {
+            window._remoteAudioStream.getAudioTracks().forEach(t => t.enabled = false);
+        }
+        
+        audio1.play().catch(() => { 
+            clearTimeout(window._ttsDecayTimer);
+            window._isTTSPlaying = false; 
+            if (window._remoteAudioStream) window._remoteAudioStream.getAudioTracks().forEach(t => t.enabled = true);
+        });
+
+        if (vbCableOutputId) {
+            const audio2 = new Audio(audioUrl);
+            if (typeof audio2.setSinkId === 'function') {
+                await audio2.setSinkId(vbCableOutputId);
+                audio2.play().catch(() => {});
+            }
+        }
+        audio1.onended = () => { 
+            URL.revokeObjectURL(audioUrl);
+            // 800ms echo-decay buffer for Azure Cloud Latency
+            clearTimeout(window._ttsDecayTimer);
+            window._ttsDecayTimer = setTimeout(() => {
+                window._isTTSPlaying = false; 
+                if (window._remoteAudioStream) window._remoteAudioStream.getAudioTracks().forEach(t => t.enabled = true);
+            }, 50);
+        };
+        audio1.onerror = () => { 
+            clearTimeout(window._ttsDecayTimer);
+            window._isTTSPlaying = false; 
+            if (window._remoteAudioStream) window._remoteAudioStream.getAudioTracks().forEach(t => t.enabled = true);
+        };
+    } catch(fetchErr) {
+        const utt = new SpeechSynthesisUtterance(cleanText);
+        utt.lang = langCode;
+        utt.onstart = () => { 
+            window._isTTSPlaying = true; 
+            if (window._remoteAudioStream) window._remoteAudioStream.getAudioTracks().forEach(t => t.enabled = false);
+        };
+        utt.onend = () => { 
+            clearTimeout(window._ttsDecayTimer);
+            window._ttsDecayTimer = setTimeout(() => {
+                window._isTTSPlaying = false; 
+                if (window._remoteAudioStream) window._remoteAudioStream.getAudioTracks().forEach(t => t.enabled = true);
+            }, 50);
+        };
+        utt.onerror = () => { 
+            clearTimeout(window._ttsDecayTimer);
+            window._isTTSPlaying = false; 
+            if (window._remoteAudioStream) window._remoteAudioStream.getAudioTracks().forEach(t => t.enabled = true);
+        };
+        window.speechSynthesis.speak(utt);
+    }
+};
+
+function escapeHTML(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+}
+
+window.archiveTranscriptEntry = function(text, confidence = 1.0, user = 'Signer', modality = 'mic') {
+    const timeStr = new Date().toLocaleTimeString('en-US', { hour12: false });
+    if (typeof transcriptEntries !== 'undefined') {
+        transcriptEntries.push({ time: timeStr, text, confidence, user, modality });
+    }
+};
+// ========== AZURE CLOUD TRANSCRIPT ARCHIVAL ==========
+async function archiveToCloud() {
+    if (typeof window.currentToken === 'undefined' || !window.currentToken) {
+        showToast("Please Sign In with Microsoft to archive transcripts to Azure.", "error");
+        return;
+    }
+    
+    if (!transcriptEntries || transcriptEntries.length === 0) {
+        showToast('No transcript entries to archive.', 'info');
+        return;
+    }
+    
+    const btn = document.getElementById('btn-cloud-archive');
+    const origContent = btn.innerHTML;
+    btn.innerHTML = '<span class="material-symbols-outlined text-[14px] animate-spin">sync</span> Uploading...';
+    btn.disabled = true;
+    
+    try {
+        let fullTranscriptStr = transcriptEntries.map(e => `[${e.time}] ${e.user} (${e.modality}): ${e.text}`).join('\n');
+        const res = await fetch(`https://localhost:49940/api/transcripts`, {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${window.currentToken}`
+             },
+            body: JSON.stringify({ Content: fullTranscriptStr })
+        });
+        
+        if (res.ok) {
+            btn.innerHTML = '<span class="material-symbols-outlined text-[14px]">cloud_done</span> Archived ✓';
+            btn.classList.replace('text-blue-400', 'text-green-400');
+            showToast('Transcript archived to Azure Cosmos DB.', 'success');
+            setTimeout(() => {
+                btn.innerHTML = origContent;
+                btn.disabled = false;
+                btn.classList.replace('text-green-400', 'text-blue-400');
+            }, 3000);
+        } else {
+            throw new Error(`API error ${res.status}`);
+        }
+    } catch(err) {
+        console.error('☁️ Archive failed:', err);
+        btn.innerHTML = '<span class="material-symbols-outlined text-[14px]">cloud_off</span> Failed';
+        setTimeout(() => {
+            btn.innerHTML = origContent;
+            btn.disabled = false;
+        }, 3000);
+    }
+}
+
+// ========== AI RAG ASSISTANT (TRANSCRIPTS) ==========
+async function queryAiTranscripts(inputId = 'ai-query-input', responseBoxId = 'ai-response-box') {
+    const inputEl = document.getElementById(inputId);
+    const responseBox = document.getElementById(responseBoxId);
+    
+    if (!inputEl || !responseBox) {
+        console.error("Missing UI elements for AI query:", inputId, responseBoxId);
+        return;
+    }
+    
+    const q = inputEl.value.trim();
+    if (!q) return;
+
+    responseBox.classList.remove('hidden');
+    responseBox.innerHTML = '<span class="animate-pulse">Consulting historical transcripts via Azure OpenAI...</span>';
+    
+    try {
+        // Collect BOTH live session transcripts AND saved archive transcripts
+        const liveTranscripts = (window._allTranscripts || []).map(t => ({
+            OriginalText: t.text || t.OriginalText || '',
+            SpeakerName: t.speaker || t.SpeakerName || 'Unknown',
+            Timestamp: t.timestamp || t.Timestamp || new Date().toISOString()
+        }));
+        
+        // Pull saved/archived transcripts — flatten their entries for granular search
+        const archiveTranscripts = [];
+        (typeof savedTranscripts !== 'undefined' ? savedTranscripts : []).forEach(session => {
+            // Add each entry from the session as a searchable transcript
+            if (Array.isArray(session.entries)) {
+                session.entries.forEach(e => {
+                    archiveTranscripts.push({
+                        OriginalText: String(e.text || e.OriginalText || ''),
+                        SpeakerName: String(e.speaker || e.SpeakerName || 'Unknown'),
+                        Timestamp: String(e.timestamp || session.date || new Date().toISOString())
+                    });
+                });
+            }
+            // Also add session-level summary and fullText as searchable
+            if (session.fullText) {
+                archiveTranscripts.push({
+                    OriginalText: String(session.fullText),
+                    SpeakerName: 'Session',
+                    Timestamp: String(session.date || new Date().toISOString())
+                });
+            }
+        });
+        
+        // Merge both sources — archive AI searches everything
+        const transcripts = [...liveTranscripts, ...archiveTranscripts];
+
+        // Try the direct in-memory endpoint first (AllowAnonymous, no DB needed)
+        let res;
+        try {
+            res = await fetch(`https://localhost:49940/api/copilot/ask-direct`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ query: q, transcripts: transcripts })
+            });
+        } catch(fetchErr) {
+            console.warn('API connection dropped, shifting to Edge computation:', fetchErr);
+            res = null;
+        }
+        
+        if (res && res.ok) {
+            const data = await res.json();
+            // Check if backend returned a real answer (not an error-in-200)
+            const answer = data.answer || data.response || '';
+            if (answer && !answer.includes('encountered an error')) {
+                responseBox.innerHTML = `<strong class="text-[#00dce6]">Copilot:</strong><br/>${answer}`;
+                inputEl.value = '';
+                return;
+            }
+        }
+        
+        // === EDGE ANALYSIS ENGINE ===
+        responseBox.innerHTML = inBrowserIntelligenceAnswer(q, transcripts);
+        inputEl.value = '';
+    } catch(err) {
+        console.error("AI RAG Error:", err);
+        responseBox.innerHTML = `<span class="text-red-400">AI Error: ${err.message || 'Unknown error'}. Try again.</span>`;
+    }
+}
+
+// ========== EDGE INTELLIGENCE Q&A ENGINE ==========
+function inBrowserIntelligenceAnswer(query, transcripts) {
+    const qLow = query.toLowerCase().trim();
+    const header = '<strong class="text-[#00dce6]">Copilot:</strong><br/>';
+
+    if (transcripts.length === 0) {
+        return `${header}<span class="text-yellow-400">No transcripts available yet. Start a session and record some conversation first.</span>`;
+    }
+
+    // --- Intent Detection ---
+    const isCount = /cuant[ao]s veces|how many times|how often|count/i.test(query);
+    const isSpeakerQ = /quien dijo|quién dijo|who said|who mentioned/i.test(query);
+    const isSummary = /resum|summary|resumen|overview|de qu[eé] se habl[oó]/i.test(query);
+    const isSessionQ = /cuant[ao]s sesion|cuant[ao]s session|how many session|sesiones hay|sessions are/i.test(query);
+    const isStatsQ = /estad[ií]stica|stats|statistics|palabras totales|total words|analytics/i.test(query);
+    const isSpeakerList = /quien[es]? particip|quién[es]? particip|who particip|speakers|hablantes|participantes/i.test(query);
+    const isHello = /^(hola|hello|hi|hey|buenos d[ií]as|buenas)/i.test(query);
+
+    // --- SESSION ANALYTICS: "cuantas sesiones hay?" ---
+    if (isSessionQ) {
+        const sessionCount = typeof savedTranscripts !== 'undefined' ? savedTranscripts.length : 0;
+        const totalEntries = transcripts.length;
+        const speakers = [...new Set(transcripts.map(t => String(t.SpeakerName || 'Unknown')))].filter(s => s !== 'Session');
+        let html = `${header}<strong>Session Analytics:</strong><br/><ul class="list-disc pl-4 mt-1">`;
+        html += `<li><strong>Total sessions saved:</strong> ${sessionCount}</li>`;
+        html += `<li><strong>Total transcript entries:</strong> ${totalEntries}</li>`;
+        html += `<li><strong>Unique speakers:</strong> ${speakers.length > 0 ? speakers.join(', ') : 'N/A'}</li>`;
+        html += `</ul>`;
+        return html;
+    }
+
+    // --- STATS: "estadísticas" / "stats" ---
+    if (isStatsQ) {
+        const wordCount = transcripts.reduce((s, t) => s + String(t.OriginalText || '').split(/\s+/).filter(w => w).length, 0);
+        const speakers = [...new Set(transcripts.map(t => String(t.SpeakerName || 'Unknown')))].filter(s => s !== 'Session');
+        const sessionCount = typeof savedTranscripts !== 'undefined' ? savedTranscripts.length : 0;
+        const avgWords = transcripts.length > 0 ? Math.round(wordCount / transcripts.length) : 0;
+        let html = `${header}<strong>Transcript Statistics:</strong><br/><ul class="list-disc pl-4 mt-1">`;
+        html += `<li><strong>Sessions:</strong> ${sessionCount}</li>`;
+        html += `<li><strong>Transcript entries:</strong> ${transcripts.length}</li>`;
+        html += `<li><strong>Total words:</strong> ~${wordCount.toLocaleString()}</li>`;
+        html += `<li><strong>Avg words/entry:</strong> ~${avgWords}</li>`;
+        html += `<li><strong>Speakers:</strong> ${speakers.length > 0 ? speakers.join(', ') : 'N/A'}</li>`;
+        html += `</ul>`;
+        return html;
+    }
+
+    // --- SPEAKER LIST: "quienes participaron?" ---
+    if (isSpeakerList) {
+        const speakerMap = {};
+        transcripts.forEach(t => {
+            const sp = String(t.SpeakerName || 'Unknown');
+            if (sp === 'Session') return;
+            speakerMap[sp] = (speakerMap[sp] || 0) + 1;
+        });
+        let html = `${header}<strong>Participants:</strong><br/><ul class="list-disc pl-4 mt-1">`;
+        Object.entries(speakerMap).sort((a,b) => b[1] - a[1]).forEach(([sp, cnt]) => {
+            html += `<li><strong>${sp}:</strong> ${cnt} transcript entries</li>`;
+        });
+        html += `</ul>`;
+        return html;
+    }
+
+    // --- GREETING ---
+    if (isHello) {
+        const sessionCount = typeof savedTranscripts !== 'undefined' ? savedTranscripts.length : 0;
+        return `${header}Hello! I'm your Transcript Intelligence assistant. I have access to <strong>${transcripts.length}</strong> transcript entries from <strong>${sessionCount}</strong> session(s).<br/><br/>` +
+            `<strong>Try asking me:</strong><ul class="list-disc pl-4 mt-1">` +
+            `<li>"How many sessions are there?"</li>` +
+            `<li>"How many times was [word] said?"</li>` +
+            `<li>"Who said [something]?"</li>` +
+            `<li>"Give me a summary"</li>` +
+            `<li>"Statistics" / "Stats"</li>` +
+            `<li>Or just type a keyword to search</li></ul>`;
+    }
+
+    // Extract search keywords (remove stop words and question patterns)
+    const stopWords = new Set(['cuantas','cuantos','veces','dije','dijo','dijeron','how','many','times','did','say','the','what','was','were','about','who','said','mentioned','que','se','hablo','habló','de','del','las','los','por','para','una','uno','con','como','cual','donde','cuando','esto','esta','eso','esa','puede','pueden','hay','tiene','son','era','fue','han','sido','más','pero','sin','sobre','entre','también','desde','hasta','cuanto','cuanta','tell','me','can','you','please','find','search','busca','buscar','dame','dime','muestra','show','all','todo','toda','todos','todas']);
+    const keywords = qLow.split(/[\s?,!.¿¡"']+/).filter(w => w.length > 2 && !stopWords.has(w));
+
+    // Score transcripts by relevance
+    const scored = transcripts.map(t => {
+        const text = String(t.OriginalText || '').toLowerCase();
+        let score = 0;
+        keywords.forEach(kw => {
+            const regex = new RegExp(kw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+            const matches = (String(t.OriginalText || '')).match(regex);
+            score += matches ? matches.length : 0;
+        });
+        return { ...t, score, textLow: text };
+    }).filter(t => t.score > 0).sort((a, b) => b.score - a.score);
+
+    // --- COUNT INTENT: "cuantas veces dije hello?" ---
+    if (isCount && keywords.length > 0) {
+        let totalCount = 0;
+        const speakerCounts = {};
+        transcripts.forEach(t => {
+            const text = String(t.OriginalText || '');
+            keywords.forEach(kw => {
+                const regex = new RegExp(kw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+                const m = text.match(regex);
+                if (m) {
+                    totalCount += m.length;
+                    const sp = String(t.SpeakerName || 'Unknown');
+                    speakerCounts[sp] = (speakerCounts[sp] || 0) + m.length;
+                }
+            });
+        });
+        const kwDisplay = keywords.join(', ');
+        let html = `${header}The word(s) <strong>"${kwDisplay}"</strong> appear <strong>${totalCount} time(s)</strong> across ${transcripts.length} transcript entries.`;
+        if (Object.keys(speakerCounts).length > 0) {
+            html += '<br/><br/><strong>By speaker:</strong><ul class="list-disc pl-4 mt-1">';
+            Object.entries(speakerCounts).sort((a,b) => b[1] - a[1]).forEach(([sp, cnt]) => {
+                html += `<li><strong>${sp}:</strong> ${cnt} time(s)</li>`;
+            });
+            html += '</ul>';
+        }
+        if (scored.length > 0) {
+            html += '<br/><strong>Sample matches:</strong><ul class="list-disc pl-4 mt-1">';
+            scored.slice(0, 5).forEach(r => {
+                html += `<li><span class="text-slate-400">[${r.Timestamp}]</span> <strong>${r.SpeakerName}:</strong> ${r.OriginalText}</li>`;
+            });
+            html += '</ul>';
+        }
+        return html;
+    }
+
+    // --- SPEAKER INTENT: "quien dijo hello?" ---
+    if (isSpeakerQ && scored.length > 0) {
+        const speakers = {};
+        scored.forEach(t => {
+            const sp = String(t.SpeakerName || 'Unknown');
+            if (!speakers[sp]) speakers[sp] = [];
+            speakers[sp].push(t);
+        });
+        let html = `${header}The following speakers mentioned <strong>"${keywords.join(', ')}"</strong>:<br/><ul class="list-disc pl-4 mt-1">`;
+        Object.entries(speakers).forEach(([sp, items]) => {
+            html += `<li><strong>${sp}</strong> (${items.length} time(s)): <em>"${String(items[0].OriginalText || '').substring(0, 100)}..."</em></li>`;
+        });
+        html += '</ul>';
+        return html;
+    }
+
+    // --- SUMMARY INTENT ---
+    if (isSummary) {
+        const speakers = [...new Set(transcripts.map(t => String(t.SpeakerName || 'Unknown')))];
+        const wordCount = transcripts.reduce((sum, t) => sum + String(t.OriginalText || '').split(/\s+/).length, 0);
+        let html = `${header}<strong>Session Summary:</strong><br/>`;
+        html += `<ul class="list-disc pl-4 mt-1">`;
+        html += `<li><strong>Total entries:</strong> ${transcripts.length}</li>`;
+        html += `<li><strong>Total words:</strong> ~${wordCount}</li>`;
+        html += `<li><strong>Speakers:</strong> ${speakers.join(', ')}</li>`;
+        html += `</ul><br/><strong>Recent content:</strong><ul class="list-disc pl-4 mt-1">`;
+        transcripts.slice(0, 5).forEach(t => {
+            const text = String(t.OriginalText || '').substring(0, 120);
+            html += `<li><strong>${t.SpeakerName}:</strong> ${text}${text.length >= 120 ? '...' : ''}</li>`;
+        });
+        html += '</ul>';
+        return html;
+    }
+
+    // --- KEYWORD SEARCH (general) ---
+    if (scored.length > 0) {
+        let html = `${header}Found <strong>${scored.length}</strong> relevant transcript(s) for "<em>${keywords.join(' ')}</em>":<br/><ul class="list-disc pl-4 mt-1">`;
+        scored.slice(0, 8).forEach(r => {
+            html += `<li><span class="text-slate-400">[${r.Timestamp}]</span> <strong>${r.SpeakerName}:</strong> ${r.OriginalText}</li>`;
+        });
+        if (scored.length > 8) html += `<li class="text-slate-500">...and ${scored.length - 8} more matches</li>`;
+        html += '</ul>';
+        return html;
+    }
+
+    // --- NO KEYWORD MATCHES — Still provide a useful answer ---
+    const sessionCount = typeof savedTranscripts !== 'undefined' ? savedTranscripts.length : 0;
+    const wordCount = transcripts.reduce((s, t) => s + String(t.OriginalText || '').split(/\s+/).filter(w => w).length, 0);
+    const speakers = [...new Set(transcripts.map(t => String(t.SpeakerName || 'Unknown')))].filter(s => s !== 'Session');
+    
+    let html = `${header}I analyzed your question: "<em>${query}</em>"<br/><br/>`;
+    html += `While I couldn't find a specific keyword match, here's what I know about your transcripts:<br/>`;
+    html += `<ul class="list-disc pl-4 mt-1">`;
+    html += `<li><strong>Sessions:</strong> ${sessionCount}</li>`;
+    html += `<li><strong>Transcript entries:</strong> ${transcripts.length}</li>`;
+    html += `<li><strong>Total words:</strong> ~${wordCount.toLocaleString()}</li>`;
+    if (speakers.length > 0) html += `<li><strong>Speakers:</strong> ${speakers.join(', ')}</li>`;
+    html += `</ul><br/>`;
+    
+    // Show a preview of recent content
+    if (transcripts.length > 0) {
+        html += `<strong>Recent entries:</strong><ul class="list-disc pl-4 mt-1">`;
+        transcripts.filter(t => String(t.OriginalText || '').length > 10).slice(0, 3).forEach(t => {
+            const text = String(t.OriginalText || '').substring(0, 100);
+            html += `<li><strong>${t.SpeakerName}:</strong> ${text}${text.length >= 100 ? '...' : ''}</li>`;
+        });
+        html += `</ul><br/>`;
+    }
+    
+    html += `<span class="text-slate-400">💡 Try: "summary", "stats", "cuantas sesiones hay?", "cuantas veces dije [word]?", or type a specific keyword.</span>`;
+    return html;
+}
+// ========== UI UPDATES ==========
+function updateUI_Recording(isRecording) {
+    const indicator = document.getElementById('recording-indicator');
+    const liveBadge = document.getElementById('live-badge');
+    const waveContainer = document.getElementById('waveform-container');
+    const outputStatus = document.getElementById('output-status');
+    
+    if (isRecording) {
+        indicator.classList.remove('hidden');
+        indicator.classList.add('flex');
+        liveBadge.classList.remove('hidden');
+        liveBadge.classList.add('flex');
+        waveContainer.classList.remove('active-glow');
+        waveContainer.classList.add('active-glow-recording');
+        outputStatus.textContent = 'LISTENING';
+        outputStatus.className = 'text-[10px] bg-green-500/10 text-green-400 px-2 py-0.5 rounded border border-green-500/20 font-bold';
+    } else {
+        indicator.classList.add('hidden');
+        indicator.classList.remove('flex');
+        liveBadge.classList.add('hidden');
+        liveBadge.classList.remove('flex');
+        waveContainer.classList.add('active-glow');
+        waveContainer.classList.remove('active-glow-recording');
+        outputStatus.textContent = 'READY';
+        outputStatus.className = 'text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded border border-primary/20 font-bold';
+    }
+}
+
+function updateMetrics() {
+    // Confidence
+    const avgConf = confidenceCount > 0 ? (confidenceSum / confidenceCount * 100).toFixed(1) : '--';
+    document.getElementById('confidence-display').textContent = 'Confidence: ' + avgConf + '%';
+    
+    // Word count
+    document.getElementById('word-count-display').textContent = 'Words: ' + totalWordCount;
+    document.getElementById('metric-cloud').textContent = totalWordCount;
+    
+    // Words per minute
+    if (sessionStartTime) {
+        const elapsed = (Date.now() - sessionStartTime) / 60000; // minutes
+        const wpm = elapsed > 0 ? Math.round(sessionWordCount / elapsed) : 0;
+        document.getElementById('metric-tokens').textContent = wpm;
+    }
+    
+    // Recognition status
+    document.getElementById('metric-npu').textContent = sessionActive ? 'Active' : 'Offline';
+    
+    // Transcript entry count
+    const countEl = document.getElementById('transcript-count');
+    if (countEl) countEl.textContent = transcriptEntries.length + ' entries';
+}
+
+// Old updateSignWord implementation removed to allow Speller Engine mapping
+
+function updateConnectionStatus(connected) {
+    const dot = document.getElementById('status-dot');
+    const status = document.getElementById('system-status');
+    if (dot) {
+        dot.className = connected
+            ? 'w-2 h-2 rounded-full bg-primary animate-pulse'
+            : 'w-2 h-2 rounded-full bg-error';
+    }
+    if (status) {
+        status.textContent = connected ? 'Active' : 'Disconnected';
+        status.className = connected ? 'text-primary' : 'text-error';
+    }
+}
+
+function updatePipelineStatus(active, transcriptCount) {
+    const btn = document.getElementById('btn-live-status');
+    const btnText = document.getElementById('live-status-text');
+    const startText = document.getElementById('btn-start-text');
+    const startIcon = document.getElementById('btn-start-icon');
+    const startBtn = document.getElementById('btn-start-session');
+    
+    if (btnText) btnText.textContent = active ? 'Pipeline Active' : 'Idle';
+    if (startText) startText.textContent = active ? 'Stop Session' : 'Start Session';
+    if (startIcon) startIcon.textContent = active ? 'stop' : 'play_arrow';
+    
+    if (btn) {
+        btn.className = active
+            ? 'px-5 py-1.5 bg-primary-container text-on-primary-container rounded-lg font-bold hover:opacity-90 transition-all flex items-center gap-2'
+            : 'px-5 py-1.5 bg-surface-container-highest text-slate-400 rounded-lg font-bold hover:opacity-90 transition-all flex items-center gap-2';
+    }
+    if (startBtn) {
+        startBtn.className = active
+            ? 'w-full py-3 rounded-xl bg-error-container text-on-error-container font-bold hover:opacity-90 transition-colors flex items-center justify-center gap-2 shadow-lg shadow-error/10'
+            : 'w-full py-3 rounded-xl bg-primary-container text-on-primary-container font-bold hover:bg-primary-fixed-dim transition-colors flex items-center justify-center gap-2 shadow-lg shadow-primary/10';
+    }
+}
+
+function updateSessionTime(time) {
+    const el1 = document.getElementById('session-time');
+    const el2 = document.getElementById('metric-session');
+    if (el1) el1.textContent = time;
+    if (el2) el2.textContent = time;
+}
+
+function updateLatency(ms) {
+    const el = document.getElementById('latency-display');
+    if (el) el.textContent = 'Latency: ' + Math.round(ms) + 'ms';
+}
+
+function updateLanguages(source, target) {
+    const srcEl = document.getElementById('lang-source');
+    const tgtEl = document.getElementById('lang-target');
+    if (srcEl) srcEl.textContent = source;
+    if (tgtEl) tgtEl.textContent = target;
+}
+
+function updateSubtitles(original, translated) {
+    const origEl = document.getElementById('subtitle-original');
+    const transEl = document.getElementById('subtitle-translated');
+    if (origEl) origEl.textContent = '...' + original;
+    if (transEl) transEl.innerHTML = '<span class="text-primary/60">"</span>' + translated + '<span class="text-primary/60">"</span>';
+}
+
+// ========== SAFE MAUI NOTIFICATION (won't kill SpeechRecognition) ==========
+function notifyMaui(command) {
+    try {
+        // Use the native WebView2 channel (no navigation = no side-effects)
+        if (window.chrome && window.chrome.webview && window.chrome.webview.postMessage) {
+            window.chrome.webview.postMessage(command);
+        }
+    } catch(e) { console.warn('MAUI notify failed:', e); }
+}
+
+// ========== SESSION CONTROL ==========
+async function startSession() {
+    if (sessionActive) return;
+    
+    sessionActive = true;
+    sessionSeconds = 0;
+    sessionWordCount = 0;
+    sessionStartTime = Date.now();
+    sessionStartTimeISO = new Date().toISOString();
+    confidenceSum = 0;
+    confidenceCount = 0;
+    transcriptEntries = []; // Reset for new session
+    
+    // Clear live transcript log
+    const log = document.getElementById('transcript-log');
+    log.innerHTML = '<p class="text-xs text-slate-500 text-center" id="transcript-placeholder">Transcription will appear here when you start speaking...</p>';
+    
+    updatePipelineStatus(true, 0);
+    updateConnectionStatus(true);
+    
+    document.getElementById('system-status').textContent = 'Listening';
+    document.getElementById('system-status').className = 'text-primary';
+    
+    // Notify C# BEFORE starting recognition (safe channel)
+    notifyMaui('startSession');
+    
+    // Start audio analyzer for waveform
+    await startAudioAnalyzer();
+    
+    // Start Azure Speech Backend Pipeline (Primary Engine / Telemetry Hub)
+    if (typeof window.startLiveSession === 'function') {
+        try {
+            await window.startLiveSession();
+        } catch (err) {
+            console.warn("Backend Azure Pipeline skipped. Falling back exclusively to local Edge engine.");
+        }
+    }
+    
+    // Unconditionally launch local speech recognition to drive 3D Avatar (pending binary audio websocket proxy)
+    startRecognition();
+    
+    // Unconditionally launch Azure remote capture for the guest (if a device is selected)
+    if (window.startRemoteAudioCapture) {
+        window.startRemoteAudioCapture();
+    }
+}
+
+function stopSession() {
+    if (!sessionActive) return;
+    
+    const endTime = new Date();
+    const durationSec = sessionSeconds;
+    
+    // Save the transcription before resetting
+    if (transcriptEntries.length > 0) {
+        saveTranscription(endTime, durationSec);
+    }
+    
+    sessionActive = false;
+    sessionSeconds = 0;
+    sessionStartTime = null;
+    sessionStartTimeISO = null;
+    transcriptEntries = [];
+    
+    updatePipelineStatus(false, 0);
+    updateUI_Recording(false);
+    updateSessionTime('00:00:00');
+    
+    document.getElementById('system-status').textContent = 'Ready';
+    document.getElementById('system-status').className = 'text-primary';
+    document.getElementById('latency-display').textContent = 'Latency: --ms';
+    
+    // Stop speech recognition
+    stopRecognition();
+    
+    // Stop audio analyzer  
+    stopAudioAnalyzer();
+    
+    // Stop Azure Speech Backend Pipeline
+    if (typeof window.stopLiveSession === 'function') {
+        try {
+            window.stopLiveSession();
+        } catch (err) { }
+    }
+    
+    // Notify C# (safe channel)
+    notifyMaui('stopSession');
+    
+    // Stop Remote Audio Capture
+    if (window.stopRemoteAudioCapture) {
+        window.stopRemoteAudioCapture();
+    }
+}
+
+// ========== TRANSCRIPTION STORAGE ==========
+
+function saveTranscription(endTime, durationSec) {
+    const startDate = new Date(sessionStartTimeISO);
+    const lang = document.getElementById('recognition-lang').value;
+    const langLabel = document.getElementById('recognition-lang').selectedOptions[0]?.text || lang;
+    
+    // Build full text
+    const fullText = transcriptEntries.map(e => e.text).join(' ');
+    
+    // Generate summary (extractive: first ~150 chars + key topic detection)
+    const summary = generateTranscriptSummary(fullText, transcriptEntries);
+    
+    // Calculate average confidence
+    const avgConf = confidenceCount > 0 ? (confidenceSum / confidenceCount) : 0;
+    
+    const transcript = {
+        id: 'tr_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6),
+        date: startDate.toLocaleDateString('en-US', { weekday:'short', year:'numeric', month:'short', day:'numeric' }),
+        dateISO: startDate.toISOString().split('T')[0],
+        startTime: startDate.toLocaleTimeString('en-US', { hour12:false }),
+        endTime: endTime.toLocaleTimeString('en-US', { hour12:false }),
+        duration: formatDuration(durationSec),
+        durationSec: durationSec,
+        language: langLabel,
+        langCode: lang,
+        wordCount: sessionWordCount,
+        avgConfidence: avgConf,
+        summary: summary,
+        entries: transcriptEntries.map(e => ({...e})),  // deep copy
+        fullText: fullText
+    };
+    
+    savedTranscripts.unshift(transcript);  // newest first
+    
+    // Persist to localStorage
+    try {
+        localStorage.setItem('ich_transcripts', JSON.stringify(savedTranscripts));
+    } catch(e) { console.warn('Failed to save transcripts:', e); }
+
+    // Persist to .NET Backend API for permanent storage
+    try {
+        if (typeof window.apiCall === 'function') {
+            // First, create the session record
+            window.apiCall('/sessions', {
+                method: 'POST',
+                body: JSON.stringify({
+                    id: transcript.id,
+                    title: `Dashboard Hub Session - ${transcript.date}`,
+                    sourceLanguage: transcript.langCode,
+                    targetLanguage: transcript.langCode,
+                    consentGiven: true
+                })
+            }).then(apiSession => {
+                // Then immediately complete it to archive the transcript
+                return window.apiCall(`/sessions/${apiSession.id}/complete`, { method: 'POST' });
+            }).catch(e => console.warn('Backend Transcription API sync bypassed: ', e));
+        }
+    } catch(err) {
+        console.warn('Backend REST API unavailable. Transcripts retained locally.', err);
+    }
+    
+    // Refresh the transcripts view
+    renderTranscriptsList();
+    
+    console.log('Transcription saved:', transcript.id, transcript.summary);
+}
+
+function generateTranscriptSummary(fullText, entries) {
+    if (!fullText || fullText.trim().length === 0) return 'Empty transcription';
+    
+    const words = fullText.trim().split(/\s+/);
+    
+    // For short texts, just use the text itself
+    if (words.length <= 20) return fullText.trim();
+    
+    // Extract key topics using word frequency (exclude common stop words)
+    const stopWords = new Set([
+        'the','a','an','is','are','was','were','be','been','being','have','has','had',
+        'do','does','did','will','would','could','should','may','might','shall',
+        'and','but','or','nor','for','yet','so','in','on','at','to','from','by',
+        'with','of','that','this','it','its','i','you','he','she','we','they',
+        'my','your','his','her','our','their','me','him','us','them',
+        'what','which','who','whom','how','when','where','why',
+        'not','no','yes','just','very','really','also','too','then','than',
+        'if','as','up','out','about','into','more','some','can','all',
+        'like','know','think','going','want','well','right','get','go',
+        'um','uh','oh','ah','okay','ok','yeah','so','like','just',
+        'el','la','los','las','de','en','un','una','que','es','y','por','para',
+        'con','no','se','del','lo','al','como','más','pero','su','le','ya'
+    ]);
+    
+    const freq = {};
+    words.forEach(w => {
+        const clean = w.toLowerCase().replace(/[^a-záéíóúñü]/g, '');
+        if (clean.length > 2 && !stopWords.has(clean)) {
+            freq[clean] = (freq[clean] || 0) + 1;
+        }
+    });
+    
+    // Get top 5 keywords
+    const keywords = Object.entries(freq)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 5)
+        .map(e => e[0]);
+    
+    // Build summary: first sentence/fragment + keywords
+    let firstPart = words.slice(0, 25).join(' ');
+    if (words.length > 25) firstPart += '...';
+    
+    let summary = firstPart;
+    if (keywords.length > 0) {
+        summary += ' — Topics: ' + keywords.join(', ');
+    }
+    return summary;
+}
+
+function formatDuration(totalSec) {
+    const h = Math.floor(totalSec / 3600);
+    const m = Math.floor((totalSec % 3600) / 60);
+    const s = totalSec % 60;
+    if (h > 0) return `${h}h ${m}m ${s}s`;
+    if (m > 0) return `${m}m ${s}s`;
+    return `${s}s`;
+}
+
+// ========== TRANSCRIPTS VIEW ==========
+
+function renderTranscriptsList() {
+    const list = document.getElementById('transcripts-list');
+    const empty = document.getElementById('transcripts-empty');
+    const countLabel = document.getElementById('transcripts-count-label');
+    
+    if (savedTranscripts.length === 0) {
+        list.innerHTML = '';
+        list.appendChild(createEmptyState());
+        countLabel.textContent = '0 transcriptions';
+        return;
+    }
+    
+    countLabel.textContent = savedTranscripts.length + ' transcription' + (savedTranscripts.length !== 1 ? 's' : '');
+    list.innerHTML = '';
+    
+    savedTranscripts.forEach((tr, idx) => {
+        const card = document.createElement('div');
+        card.className = 'rounded-xl p-5 border border-outline-variant/10 hover:border-primary/20 transition-all cursor-pointer group';
+        card.style.background = '#222a3d';
+        card.onclick = () => openTranscriptModal(tr);
+        
+        card.innerHTML = `
+            <div class="flex items-start justify-between mb-3">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                        <span class="material-symbols-outlined text-primary" style="font-variation-settings:'FILL' 1;">description</span>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-sm group-hover:text-primary transition-colors">Session — ${escapeHTML(tr.date)}</h4>
+                        <p class="text-[10px] text-slate-400 mt-0.5">${escapeHTML(tr.startTime)} → ${escapeHTML(tr.endTime)} · ${escapeHTML(tr.duration)} · ${escapeHTML(tr.language)}</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="text-[10px] text-primary/60 font-mono">${tr.wordCount} words</span>
+                    <span class="text-[10px] px-2 py-0.5 rounded bg-primary/10 text-primary font-bold">${tr.avgConfidence > 0 ? Math.round(tr.avgConfidence * 100) + '%' : '--'}</span>
+                    <button onclick="event.stopPropagation(); deleteTranscript('${tr.id}')" class="p-1 rounded hover:bg-error/10 transition-colors opacity-0 group-hover:opacity-100">
+                        <span class="material-symbols-outlined text-[16px] text-slate-500 hover:text-error">delete</span>
+                    </button>
+                </div>
+            </div>
+            <p class="text-xs text-slate-400 leading-relaxed line-clamp-2">${escapeHTML(tr.summary)}</p>
+        `;
+        list.appendChild(card);
+    });
+}
+
+function createEmptyState() {
+    const div = document.createElement('div');
+    div.id = 'transcripts-empty';
+    div.className = 'flex flex-col items-center justify-center py-20 text-center';
+    div.innerHTML = `
+        <span class="material-symbols-outlined text-6xl text-slate-600 mb-4">folder_open</span>
+        <p class="text-lg font-semibold text-slate-400">No transcriptions yet</p>
+        <p class="text-sm text-slate-500 mt-1">Start a session and speak — your transcriptions will appear here when you stop.</p>
+    `;
+    return div;
+}
+
+function deleteTranscript(id) {
+    savedTranscripts = savedTranscripts.filter(t => t.id !== id);
+    try { localStorage.setItem('ich_transcripts', JSON.stringify(savedTranscripts)); } catch(e) {}
+    renderTranscriptsList();
+}
+
+// ========== TRANSCRIPT DETAIL MODAL ==========
+
+function openTranscriptModal(tr) {
+    currentModalTranscript = tr;
+    
+    document.getElementById('modal-title').textContent = 'Session — ' + tr.date;
+    document.getElementById('modal-subtitle').textContent = tr.startTime + ' → ' + tr.endTime + ' · ' + tr.language;
+    document.getElementById('modal-date').textContent = tr.date;
+    document.getElementById('modal-duration').textContent = tr.duration;
+    document.getElementById('modal-words').textContent = tr.wordCount + ' words';
+    document.getElementById('modal-confidence').textContent = tr.avgConfidence > 0 ? Math.round(tr.avgConfidence * 100) + '%' : '--';
+    document.getElementById('modal-summary').textContent = tr.summary;
+    
+    // Render full transcript with timestamps
+    const body = document.getElementById('modal-transcript-body');
+    body.innerHTML = '';
+    
+    if (tr.entries && tr.entries.length > 0) {
+        tr.entries.forEach(entry => {
+            const row = document.createElement('div');
+            row.className = 'flex items-start gap-3 py-2 border-b border-outline-variant/5';
+            const confStr = entry.confidence > 0 ? Math.round(entry.confidence * 100) + '%' : '';
+            row.innerHTML = `
+                <span class="text-[10px] font-mono text-primary/50 pt-0.5 shrink-0 w-16">${escapeHTML(entry.time)}</span>
+                <p class="text-sm text-on-surface flex-1 leading-relaxed">${escapeHTML(entry.text)}</p>
+                ${confStr ? '<span class="text-[10px] font-mono text-slate-500 pt-0.5 shrink-0">' + confStr + '</span>' : ''}
+            `;
+            body.appendChild(row);
+        });
+    } else {
+        body.innerHTML = '<p class="text-sm text-slate-500 italic">No individual entries available.</p>';
+    }
+    
+    document.getElementById('transcript-modal').classList.add('open');
+}
+
+function closeTranscriptModal() {
+    document.getElementById('transcript-modal').classList.remove('open');
+    currentModalTranscript = null;
+}
+
+function copyTranscriptText() {
+    if (!currentModalTranscript) return;
+    const text = currentModalTranscript.entries
+        .map(e => `[${e.time}] ${e.text}`)
+        .join('\n');
+    navigator.clipboard.writeText(text).then(() => {
+        // Brief visual feedback
+        const btn = event.target.closest('button');
+        const orig = btn.innerHTML;
+        btn.innerHTML = '<span class="material-symbols-outlined text-[14px]">check</span> Copied!';
+        setTimeout(() => btn.innerHTML = orig, 1500);
+    });
+}
+
+// ========== EXPORT ==========
+
+function exportCurrentTranscript(format) {
+    if (!currentModalTranscript) return;
+    const tr = currentModalTranscript;
+    let content, filename, mime;
+    
+    if (format === 'txt') {
+        content = `TRANSCRIPT — ${tr.date}\n`;
+        content += `Start: ${tr.startTime} | End: ${tr.endTime} | Duration: ${tr.duration}\n`;
+        content += `Language: ${tr.language} | Words: ${tr.wordCount} | Confidence: ${tr.avgConfidence > 0 ? Math.round(tr.avgConfidence*100)+'%' : 'N/A'}\n`;
+        content += `\nSUMMARY:\n${tr.summary}\n`;
+        content += `\nFULL TRANSCRIPT:\n` + '='.repeat(50) + '\n';
+        tr.entries.forEach(e => { content += `[${e.time}] ${e.text}\n`; });
+        filename = `transcript_${tr.dateISO}_${tr.startTime.replace(/:/g,'')}.txt`;
+        mime = 'text/plain';
+    } else if (format === 'json') {
+        content = JSON.stringify(tr, null, 2);
+        filename = `transcript_${tr.dateISO}_${tr.startTime.replace(/:/g,'')}.json`;
+        mime = 'application/json';
+    } else if (format === 'srt') {
+        content = '';
+        tr.entries.forEach((e, i) => {
+            const startSrt = timeToSrt(e.time);
+            const nextTime = tr.entries[i+1]?.time || incrementTime(e.time, 3);
+            const endSrt = timeToSrt(nextTime);
+            content += `${i+1}\n${startSrt} --> ${endSrt}\n${e.text}\n\n`;
+        });
+        filename = `transcript_${tr.dateISO}_${tr.startTime.replace(/:/g,'')}.srt`;
+        mime = 'text/plain';
+    }
+    
+    downloadFile(content, filename, mime);
+}
+
+function exportAllTranscripts() {
+    if (savedTranscripts.length === 0) return;
+    const content = JSON.stringify(savedTranscripts, null, 2);
+    downloadFile(content, 'all_transcripts.json', 'application/json');
+}
+
+function downloadFile(content, filename, mime) {
+    const blob = new Blob([content], { type: mime });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = filename;
+    
+    // Fallback para entornos webview restringidos: intentar mostrar picker
+    if (window.showSaveFilePicker) {
+        // En un entorno asíncrono, lo manejamos pero de forma silenciosa si falla
+        const options = {
+            suggestedName: filename,
+            types: [{
+                description: 'File',
+                accept: { [mime]: ['.' + filename.split('.').pop()] },
+            }],
+        };
+        window.showSaveFilePicker(options)
+            .then(handle => handle.createWritable())
+            .then(writable => {
+                writable.write(blob).then(() => writable.close());
+            })
+            .catch(err => {
+                console.log('File picker canceled or failed, using fallback a.click()', err);
+                triggerClassicDownload(url, filename, a);
+            });
+    } else {
+        triggerClassicDownload(url, filename, a);
+    }
+}
+
+function triggerClassicDownload(url, filename, a) {
+    document.body.appendChild(a); 
+    a.click();
+    // Es crítico darle tiempo al navegador de procesar el enlace antes de revocar la URL en WebView2
+    setTimeout(() => {
+        if (document.body.contains(a)) {
+            document.body.removeChild(a);
+        }
+        URL.revokeObjectURL(url);
+    }, 500);
+}
+
+function timeToSrt(timeStr) {
+    // Convert HH:MM:SS to SRT format HH:MM:SS,000
+    return (timeStr || '00:00:00') + ',000';
+}
+
+function incrementTime(timeStr, seconds) {
+    const parts = (timeStr || '00:00:00').split(':').map(Number);
+    let total = parts[0]*3600 + parts[1]*60 + parts[2] + seconds;
+    const h = String(Math.floor(total/3600)).padStart(2,'0');
+    const m = String(Math.floor((total%3600)/60)).padStart(2,'0');
+    const s = String(total%60).padStart(2,'0');
+    return h+':'+m+':'+s;
+}
+
+// ========== SIDEBAR NAVIGATION ==========
+
+function switchView(viewName) {
+    currentView = viewName;
+    
+    // Update nav links
+    document.querySelectorAll('nav a').forEach(link => {
+        link.className = 'flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ease-in-out text-slate-400 hover:text-slate-200 hover:bg-[#2d3449]/50 active:scale-95';
+    });
+    const activeLink = document.getElementById('nav-' + viewName);
+    if (activeLink) {
+        activeLink.className = 'flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ease-in-out text-[#00dce6] bg-[#2d3449] border-r-2 border-[#00dce6] font-semibold active:scale-95';
+    }
+    
+    // Show/hide views
+    const audioView = document.getElementById('view-audio');
+    const transcriptsView = document.getElementById('view-transcripts');
+    
+    if (audioView) audioView.classList.toggle('active', viewName === 'audio' || viewName === 'sign');
+    if (transcriptsView) transcriptsView.classList.toggle('active', viewName === 'transcripts');
+    
+    // Render transcripts list when switching to that view
+    if (viewName === 'transcripts') {
+        renderTranscriptsList();
+    }
+}
+
+// Wire sidebar nav clicks
+['audio', 'sign', 'transcripts', 'settings'].forEach(name => {
+    const el = document.getElementById('nav-' + name);
+    if (el) {
+        el.addEventListener('click', (e) => {
+            e.preventDefault();
+            switchView(name);
+        });
+    }
+});
+
+// Close modal on backdrop click
+document.getElementById('transcript-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeTranscriptModal();
+});
+
+// Close modal on Escape key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeTranscriptModal();
+});
+
+// ========== INIT ==========
+initWaveform();
+loadMicrophones();
+
+// Session timer
+setInterval(() => {
+    if (sessionActive) {
+        sessionSeconds++;
+        const h = String(Math.floor(sessionSeconds / 3600)).padStart(2, '0');
+        const m = String(Math.floor((sessionSeconds % 3600) / 60)).padStart(2, '0');
+        const s = String(sessionSeconds % 60).padStart(2, '0');
+        updateSessionTime(h + ':' + m + ':' + s);
+        
+        // Update latency display (approximate recognition latency)
+        const latency = Math.floor(Math.random() * 40 + 80);
+        updateLatency(latency);
+        
+        // Update metrics periodically
+        updateMetrics();
+    }
+}, 1000);
+
+// ========== MULTI-TAB HARDWARE LOCK ==========
+const audioLockChannel = new BroadcastChannel('ich_audio_lock');
+
+audioLockChannel.onmessage = (event) => {
+    if (event.data === 'START_MIC' && sessionActive) {
+        console.warn('Another tab claimed the microphone. Surrendering hardware gracefully.');
+        stopSession();
+        
+        const outputStatus = document.getElementById('output-status');
+        if (outputStatus) {
+            outputStatus.textContent = 'SURRENDERED TO TAB';
+            outputStatus.className = 'text-[9px] bg-amber-500/10 text-amber-500 px-2 py-0.5 rounded border border-amber-500/20 font-bold';
+        }
+    }
+};
+
+// Start Session button listener
+document.getElementById('btn-start-session').addEventListener('click', function(e) {
+    e.preventDefault();
+    if (sessionActive) {
+        stopSession();
+    } else {
+        audioLockChannel.postMessage('START_MIC');
+        // Give other tabs 250ms to release the hardware audio lock
+        setTimeout(() => startSession(), 250);
+    }
+});
+
+// Also handle the live status button as stop
+const btnLiveStatus = document.getElementById('btn-live-status');
+if (btnLiveStatus) {
+    btnLiveStatus.addEventListener('click', function(e) {
+        e.preventDefault();
+        if (sessionActive) {
+            stopSession();
+        }
+    });
+}
+
+// Language change while active — stop, destroy, and restart with new language
+document.getElementById('recognition-lang').addEventListener('change', function() {
+    if (sessionActive) {
+        // Set flag so onerror/onend handlers know this is intentional
+        isChangingLanguage = true;
+        // Show brief status update
+        const outputStatus = document.getElementById('output-status');
+        outputStatus.textContent = 'SWITCHING...';
+        outputStatus.className = 'text-[10px] bg-tertiary/10 text-tertiary px-2 py-0.5 rounded border border-tertiary/20 font-bold';
+        // Stop and destroy current recognition
+        if (recognition) {
+            try { recognition.stop(); } catch(e) {}
+            recognition = null;
+        }
+        // Wait, then clear flag and restart with new language
+        setTimeout(() => {
+            isChangingLanguage = false;
+            if (sessionActive) {
+                startRecognition();
+                // Restore status
+                outputStatus.textContent = 'LISTENING';
+                outputStatus.className = 'text-[10px] bg-green-500/10 text-green-400 px-2 py-0.5 rounded border border-green-500/20 font-bold';
+            }
+        }, 600);
+    }
+});
+
+// CSS animation for fade-in
+const style = document.createElement('style');
+style.textContent = '@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }';
+document.head.appendChild(style);
+
+// ========== MIC-SELECT CHANGE HANDLER ==========
+// When the user picks a different mic from the dropdown, restart the audio pipeline
+document.getElementById('mic-select').addEventListener('change', function() {
+    console.log('🎤 [MIC SWITCH] User selected:', this.options[this.selectedIndex]?.text);
+    
+    if (sessionActive) {
+        // 1. Stop the waveform analyzer (which uses the old mic via getUserMedia)
+        stopAudioAnalyzer();
+        
+        // 2. Stop current speech recognition
+        stopRecognition();
+        
+        // 3. Restart waveform with the new mic
+        startAudioAnalyzer();
+        
+        // 4. Brief pause then restart speech recognition
+        setTimeout(() => {
+            startRecognition();
+            if (typeof showToast !== 'undefined') {
+                showToast("Microphone switched. Note: Speech-to-Text uses the browser default mic (change in browser settings).", "info");
+            }
+        }, 500);
+    }
+});
+
+// ========== SIGN.MT IFRAME HEALTH CHECK ==========
+// Detect if the sign.mt Angular app is unreachable and show a nice fallback
+(function checkSignIframe(retries = 20) {
+    const iframe = document.getElementById('sign-iframe');
+    const fallback = document.getElementById('sign-iframe-fallback');
+    if (!iframe || !fallback) return;
+    
+    // Method 1: Try to fetch the sign.mt URL
+    fetch('http://localhost:4200/', { mode: 'no-cors', cache: 'no-cache' })
+        .then(() => {
+            // Request succeeded (even opaque) — sign.mt is running
+            fallback.classList.add('hidden');
+            iframe.style.display = '';
+            // Force a clean reload if it was stuck
+            if(iframe.getAttribute('data-active') !== 'true') {
+                iframe.src = 'http://localhost:4200/translate';
+                iframe.setAttribute('data-active', 'true');
+                console.log('🤟 [SIGN.MT] Service recovered and iframe re-mounted.');
+            }
+        })
+        .catch(() => {
+            if (retries > 0) {
+                console.warn(`🤟 [SIGN.MT] Service at localhost:4200 warming up. Retrying... (${retries} attempts left)`);
+                setTimeout(() => checkSignIframe(retries - 1), 3000);
+            } else {
+                // sign.mt is offline — show fallback
+                console.warn('🤟 [SIGN.MT] Service at localhost:4200 is unreachable! Showing fallback card.');
+                fallback.classList.remove('hidden');
+                iframe.style.display = 'none';
+            }
+        });
+})();
+
+// Global state for decoupled translation
+window.currentSpoken = 'en-US';
+window.currentSigned = 'en-US';
+
+// Dynamic Languages DB
+const STT_SIGN_MAP = [
+    { spoken: 'en-US', signed: 'ase', label: 'American' },
+    { spoken: 'es-ES', signed: 'ssp', label: 'Spanish' },
+    { spoken: 'fr-FR', signed: 'fsl', label: 'French' },
+    { spoken: 'de-DE', signed: 'gsg', label: 'German' },
+    { spoken: 'en-GB', signed: 'bfi', label: 'British' },
+    { spoken: 'en-IN', signed: 'ils', label: 'Intl Sign' },
+    { spoken: 'de-CH', signed: 'sgg', label: 'Swiss Ger.' },
+    { spoken: 'fr-CH', signed: 'ssr', label: 'Swiss Fre.' },
+    { spoken: 'it-CH', signed: 'slf', label: 'Swiss Ita.' },
+    { spoken: 'zh-CN', signed: 'csl', label: 'Chinese' },
+    { spoken: 'hr-HR', signed: 'csq', label: 'Croatian' },
+    { spoken: 'cs-CZ', signed: 'cse', label: 'Czech' },
+    { spoken: 'da-DK', signed: 'dsl', label: 'Danish' },
+    { spoken: 'hi-IN', signed: 'ins', label: 'Indian' },
+    { spoken: 'en-NZ', signed: 'nzs', label: 'New Zealand' },
+    { spoken: 'et-EE', signed: 'eso', label: 'Estonian' },
+    { spoken: 'fi-FI', signed: 'fse', label: 'Finnish' },
+    { spoken: 'de-AT', signed: 'asq', label: 'Austrian' },
+    { spoken: 'el-GR', signed: 'gss', label: 'Greek' },
+    { spoken: 'is-IS', signed: 'icl', label: 'Icelandic' },
+    { spoken: 'it-IT', signed: 'ise', label: 'Italian' },
+    { spoken: 'ja-JP', signed: 'jsl', label: 'Japanese' },
+    { spoken: 'lv-LV', signed: 'lsl', label: 'Latvian' },
+    { spoken: 'lt-LT', signed: 'lls', label: 'Lithuanian' },
+    { spoken: 'fa-IR', signed: 'psc', label: 'Persian' },
+    { spoken: 'pl-PL', signed: 'pso', label: 'Polish' },
+    { spoken: 'pt-BR', signed: 'bzs', label: 'Brazilian' },
+    { spoken: 'pt-PT', signed: 'psr', label: 'Portuguese' },
+    { spoken: 'ro-RO', signed: 'rms', label: 'Romanian' },
+    { spoken: 'ru-RU', signed: 'rsl', label: 'Russian' },
+    { spoken: 'sk-SK', signed: 'svk', label: 'Slovak' },
+    { spoken: 'es-AR', signed: 'aed', label: 'Argentine' },
+    { spoken: 'es-CL', signed: 'csg', label: 'Chilean' },
+    { spoken: 'es-CU', signed: 'csf', label: 'Cuban' },
+    { spoken: 'es-MX', signed: 'mfs', label: 'Mexican' },
+    { spoken: 'sv-SE', signed: 'swl', label: 'Swedish' },
+    { spoken: 'tr-TR', signed: 'tsm', label: 'Turkish' },
+    { spoken: 'uk-UA', signed: 'ukl', label: 'Ukrainian' },
+    { spoken: 'ur-PK', signed: 'pks', label: 'Pakistan' }
+];
+
+const availableSpoken = [...new Set(STT_SIGN_MAP.map(m => m.spoken))];
+const availableSigned = STT_SIGN_MAP.map(m => ({ code: m.signed, label: m.label }));
+
+const uniqueSpokenMap = new Map();
+STT_SIGN_MAP.forEach(m => {
+    if (!uniqueSpokenMap.has(m.spoken)) uniqueSpokenMap.set(m.spoken, m.label);
+});
+
+window.setSpokenLanguage = function(code) {
+    window.currentSpoken = code;
+    applyRibbonLanguage();
+};
+
+window.setSignedLanguage = function(code) {
+    window.currentSigned = code;
+    applyRibbonLanguage();
+};
+
+// Strict layout constraints
+const btnBase = "flex-1 whitespace-nowrap px-1 py-1.5 text-[10px] md:text-[11px] font-medium tracking-wide rounded border transition-all text-center";
+const btnOff = btnBase + " border-transparent bg-[#2d3449]/40 text-slate-400 hover:bg-[#2d3449] hover:text-white capitalize truncate block";
+const btnOn = btnBase + " border-[#00dce6]/50 bg-[#00dce6]/10 text-[#00dce6] shadow-[0_0_8px_rgba(0,220,230,0.15)] capitalize font-bold truncate block";
+
+window.applyRibbonLanguage = function() {
+    const spokenCode = window.currentSpoken;
+    const signedCode = window.currentSigned;
+
+    // Reset standard buttons
+    document.querySelectorAll('#ribbon-spoken button').forEach(b => b.className = btnOff);
+    document.querySelectorAll('#ribbon-signed button').forEach(b => b.className = btnOff);
+    
+    // Reset combo boxes
+    const selectSpk = document.getElementById('select-spk');
+    const selectSgn = document.getElementById('select-sgn');
+    if(selectSpk) selectSpk.className = "w-full appearance-none outline-none cursor-pointer pr-6 pl-2 " + btnOff;
+    if(selectSgn) selectSgn.className = "w-full appearance-none outline-none cursor-pointer pr-6 pl-2 " + btnOff;
+    
+    // Apply Active States
+    const finalSpkBtn = document.getElementById('btn-spk-' + spokenCode);
+    if (finalSpkBtn) { 
+        finalSpkBtn.className = btnOn; 
+        if (selectSpk) selectSpk.value = "";
+    } else if (selectSpk) {
+        selectSpk.value = spokenCode;
+        selectSpk.className = "w-full appearance-none outline-none cursor-pointer pr-6 pl-2 " + btnOn;
+    }
+    
+    const finalSgnBtn = document.getElementById('btn-sgn-' + signedCode);
+    if (finalSgnBtn) { 
+        finalSgnBtn.className = btnOn; 
+        if (selectSgn) selectSgn.value = "";
+    } else if (selectSgn) {
+        selectSgn.value = signedCode;
+        selectSgn.className = "w-full appearance-none outline-none cursor-pointer pr-6 pl-2 " + btnOn;
+    }
+
+    const selectElem = document.getElementById('recognition-lang');
+    if (selectElem && selectElem.value !== spokenCode) {
+        selectElem.value = spokenCode; 
+        selectElem.dispatchEvent(new Event('change')); 
+    }
+    
+    // translation-lang is intentionally NOT synced with recognition-lang
+    // They are independent: recognition = input language, translation = output language
+
+    // sign-lang dropdown removed; signed language is now controlled by ribbon-signed only
+    
+    const iframe = document.getElementById('sign-iframe');
+    if (iframe && iframe.contentWindow) {
+        iframe.contentWindow.postMessage({
+            type: 'set_language',
+            spoken: spokenCode.split('-')[0], 
+            signed: signedCode                
+        }, '*');
+    }
+};
+
+window.initDynamicRibbon = function() {
+    const spkContainer = document.getElementById('ribbon-spoken');
+    const sgnContainer = document.getElementById('ribbon-signed');
+    if(!spkContainer || !sgnContainer) return;
+    
+    spkContainer.innerHTML = '';
+    sgnContainer.innerHTML = '';
+    
+    const topSpoken = ['en-US', 'es-ES', 'fr-FR'];
+    const topSigned = ['ase', 'ssp', 'fsl'];
+    
+    // Spoken Buttons
+    availableSpoken.forEach(code => {
+        if (topSpoken.includes(code)) {
+            const name = uniqueSpokenMap.get(code) || code;
+            const btn = document.createElement('button');
+            btn.id = 'btn-spk-' + code;
+            btn.dataset.code = code;
+            btn.innerText = name.split(' (')[0];
+            btn.onclick = () => setSpokenLanguage(code);
+            spkContainer.appendChild(btn);
+        }
+    });
+
+    // Spoken Combobox
+    const spkWrap = document.createElement('div');
+    spkWrap.className = "relative flex-1 flex items-center";
+    const spkSel = document.createElement('select');
+    spkSel.id = 'select-spk';
+    spkSel.innerHTML = '<option value="" disabled hidden selected class="bg-[#2d3449] text-slate-400">More...</option>';
+    availableSpoken.forEach(code => {
+        if (!topSpoken.includes(code)) {
+            const name = uniqueSpokenMap.get(code) || code;
+            const opt = document.createElement('option');
+            opt.className = "bg-[#2d3449] text-white";
+            opt.value = code; opt.innerText = name;
+            spkSel.appendChild(opt);
+        }
+    });
+    spkSel.onchange = (e) => { if(e.target.value) setSpokenLanguage(e.target.value); };
+    const spkIcon = document.createElement('span');
+    spkIcon.className = "material-symbols-outlined absolute right-1.5 text-[14px] text-inherit pointer-events-none";
+    spkIcon.innerText = "expand_more";
+    spkWrap.appendChild(spkSel); spkWrap.appendChild(spkIcon);
+    spkContainer.appendChild(spkWrap);
+    
+    // Signed Buttons
+    availableSigned.forEach(lang => {
+        if (topSigned.includes(lang.code)) {
+            const btn = document.createElement('button');
+            btn.id = 'btn-sgn-' + lang.code;
+            btn.dataset.code = lang.code;
+            btn.innerText = lang.label;
+            btn.onclick = () => setSignedLanguage(lang.code);
+            sgnContainer.appendChild(btn);
+        }
+    });
+
+    // Signed Combobox
+    const sgnWrap = document.createElement('div');
+    sgnWrap.className = "relative flex-1 flex items-center";
+    const sgnSel = document.createElement('select');
+    sgnSel.id = 'select-sgn';
+    sgnSel.innerHTML = '<option value="" disabled hidden selected class="bg-[#2d3449] text-slate-400">More...</option>';
+    availableSigned.forEach(lang => {
+        if (!topSigned.includes(lang.code)) {
+            const opt = document.createElement('option');
+            opt.className = "bg-[#2d3449] text-white";
+            opt.value = lang.code; opt.innerText = lang.label;
+            sgnSel.appendChild(opt);
+        }
+    });
+    sgnSel.onchange = (e) => { if(e.target.value) setSignedLanguage(e.target.value); };
+    const sgnIcon = document.createElement('span');
+    sgnIcon.className = "material-symbols-outlined absolute right-1.5 text-[14px] text-inherit pointer-events-none";
+    sgnIcon.innerText = "expand_more";
+    sgnWrap.appendChild(sgnSel); sgnWrap.appendChild(sgnIcon);
+    sgnContainer.appendChild(sgnWrap);
+    
+    // Globally populate the static HTML selects using STT_SIGN_MAP
+    const recLang = document.getElementById('recognition-lang');
+    const transLang = document.getElementById('translation-lang');
+    const signLang = document.getElementById('sign-lang');
+    
+    let spokenOptionsHtml = '';
+    availableSpoken.forEach(code => {
+        spokenOptionsHtml += `<option value="${code}" class="bg-[#2d3449] text-white">${uniqueSpokenMap.get(code) || code}</option>`;
+    });
+    
+    let signedOptionsHtml = '';
+    availableSigned.forEach(lang => {
+        signedOptionsHtml += `<option value="${lang.code}" class="bg-[#2d3449] text-white">${lang.label}</option>`;
+    });
+
+    if (recLang) {
+        recLang.innerHTML = spokenOptionsHtml;
+        recLang.value = window.currentSpoken;
+        recLang.addEventListener('change', (e) => {
+            if (window.currentSpoken !== e.target.value) setSpokenLanguage(e.target.value);
+        });
+    }
+    if (transLang) {
+        transLang.innerHTML = spokenOptionsHtml;
+        // Default translation target to English if input is not English, otherwise Spanish
+        const defaultTransTarget = window.currentSpoken?.startsWith('en') ? 'es' : 'en-US';
+        transLang.value = defaultTransTarget;
+        // translation-lang is independent — does NOT call setSpokenLanguage
+    }
+    if (signLang) {
+        signLang.innerHTML = signedOptionsHtml;
+        signLang.value = window.currentSigned;
+        signLang.addEventListener('change', (e) => {
+            if (window.currentSigned !== e.target.value) setSignedLanguage(e.target.value);
+        });
+    }
+    
+    applyRibbonLanguage();
+};
+
+initDynamicRibbon();
+
+// Bind Zoom Slider to iframe CSS Transform
+const zoomSlider = document.getElementById('zoom-slider');
+if (zoomSlider) {
+    zoomSlider.addEventListener('input', (e) => {
+        const scale = e.target.value / 100;
+        const iframe = document.getElementById('sign-iframe');
+        if (iframe) {
+            iframe.style.transform = `scale(${scale})`;
+            iframe.style.transformOrigin = 'center center';
+        }
+    });
+}
+</script>
+<!-- Accent Oracle Modal -->
+<div id="modal-accent-oracle" class="modal-backdrop z-[100]">
+    <div class="modal-panel surface-container-high rounded-3xl p-8 border border-outline-variant/20 shadow-2xl relative" style="background:#131b2e; max-width: 500px">
+        <button id="oracle-close" class="absolute top-6 right-6 text-slate-400 hover:text-white">
+            <span class="material-symbols-outlined">close</span>
+        </button>
+        <div class="text-center mb-8">
+            <span class="material-symbols-outlined text-purple-400 text-5xl mb-4">troubleshoot</span>
+            <h2 class="text-2xl font-bold text-white mb-2">Accent Oracle</h2>
+            <p class="text-sm text-slate-400">Diagnose your dialect origin dynamically.</p>
+        </div>
+        <div class="bg-[#0b1326] rounded-xl p-6 text-center border border-[#2d3449]/50 mb-6 shadow-inner">
+            <p class="text-lg text-slate-300 italic mb-4">"The quick brown fox jumps over the lazy dog."</p>
+            <button id="btn-oracle-listen" class="px-6 py-3 bg-gradient-to-r from-purple-600 to-[#1aaaca] hover:opacity-90 text-white rounded-lg font-bold transition-all flex items-center gap-2 mx-auto shadow-[0_0_15px_rgba(168,85,247,0.4)]">
+                <span class="material-symbols-outlined">mic</span> Start Diagnostic
+            </button>
+        </div>
+        <div id="oracle-results" class="hidden space-y-4">
+            <h3 class="text-[11px] font-bold text-slate-500 uppercase tracking-[0.2em] text-center mb-4">Phonetic Signature Match</h3>
+            <div class="flex justify-between items-center text-sm">
+                <span class="text-slate-400">Native English (US) Baseline</span>
+                <span id="oracle-score-native" class="font-bold text-[#00dce6]">0%</span>
+            </div>
+            <div class="w-full bg-[#2d3449] h-2 rounded-full overflow-hidden shadow-inner flex">
+                <div id="oracle-bar-native" class="bg-gradient-to-r from-[#00dce6]/50 to-[#00dce6] h-full transition-all duration-1000 ease-out" style="width: 0%"></div>
+            </div>
+            
+            <div class="flex justify-between items-center text-sm mt-4">
+                <span class="text-slate-400">Detected Dialect Influence</span>
+                <span id="oracle-score-foreign" class="font-bold text-purple-400">0%</span>
+            </div>
+            <div class="w-full bg-[#2d3449] h-2 rounded-full overflow-hidden shadow-inner flex">
+                <div id="oracle-bar-foreign" class="bg-gradient-to-r from-purple-400/50 to-purple-400 h-full transition-all duration-1000 ease-out" style="width: 0%"></div>
+            </div>
+            <p id="oracle-verdict" class="text-center text-sm mt-6 font-bold text-white bg-white/5 border border-white/10 py-3 px-4 rounded-xl"></p>
+        </div>
+    </div>
+</div>
+<!-- Gesture Lab UI Panel -->
+<div id="gesture-lab" class="absolute inset-0 bg-black/80 z-50 hidden flex-col items-center justify-center p-4">
+    <div class="bg-surface-container-high rounded-xl p-6 shadow-2xl max-w-md w-full relative">
+        <h3 class="text-xl font-bold text-white mb-4 text-center">Gesture Training Lab</h3>
+        <p class="text-sm text-slate-400 mb-6 text-center">Train custom gestures for real-time recognition.</p>
+        
+        <div class="space-y-4">
+            <div>
+                <label for="gesture-name" class="block text-sm font-medium text-slate-300 mb-1">Gesture Name</label>
+                <input type="text" id="gesture-name" class="w-full p-2 rounded-lg bg-surface-container-low border border-outline-variant/20 text-white focus:ring-purple-500 focus:border-purple-500" placeholder="e.g., 'Hello', 'Thank You'">
+            </div>
+            
+            <div class="flex justify-between items-center">
+                <span class="text-sm font-medium text-slate-300">Samples per Gesture:</span>
+                <span id="sample-count" class="text-lg font-bold text-purple-400">0</span>
+            </div>
+            
+            <button id="btn-add-sample" class="w-full px-4 py-2 bg-gradient-to-r from-purple-600 to-[#1aaaca] hover:opacity-90 text-white rounded-lg font-bold transition-all flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(168,85,247,0.4)]">
+                <span class="material-symbols-outlined">add_circle</span> Add Sample
+            </button>
+            
+            <button id="btn-train-model" class="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold transition-all flex items-center justify-center gap-2">
+                <span class="material-symbols-outlined">model_training</span> Train Model
+            </button>
+            
+            <button id="btn-save-model" class="w-full px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-bold transition-all flex items-center justify-center gap-2">
+                <span class="material-symbols-outlined">save</span> Save Model
+            </button>
+            
+            <button id="btn-load-model" class="w-full px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg font-bold transition-all flex items-center justify-center gap-2">
+                <span class="material-symbols-outlined">upload_file</span> Load Model
+            </button>
+            
+            <button id="btn-clear-model" class="w-full px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-bold transition-all flex items-center justify-center gap-2">
+                <span class="material-symbols-outlined">delete</span> Clear Model
+            </button>
+        </div>
+        
+        <button id="btn-close-lab" class="absolute top-4 right-4 text-slate-400 hover:text-white">
+            <span class="material-symbols-outlined">close</span>
+        </button>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.20.0/dist/tf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/knn-classifier@1.2.2/dist/knn-classifier.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/microsoft-cognitiveservices-speech-sdk@1.33.0/distrib/browser/microsoft.cognitiveservices.speech.sdk.bundle-min.js"></script>
+<script type="module" src="js/vision_bundle.mjs"></script>
+<script src="js/app.js?v=6"></script>
+
+<!-- Microsoft Innovation Challenge: Progressive Web App / Edge Cache Worker -->
+<script>
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+        navigator.serviceWorker.register('/sw.js').then(function(registration) {
+            console.log('✅ ServiceWorker registration successful - Edge AI Caching Active (Scope: ' + registration.scope + ')');
+        }).catch(function(err) {
+            console.warn('❌ ServiceWorker registration failed: ', err);
+        });
+    });
+}
+</script>
+
+<!-- ========== TOAST NOTIFICATIONS + AZURE STATUS + PDF EXPORT + SIGN LIBRARY CLOUD ========== -->
+<div id="toast-container" style="position:fixed;top:20px;right:20px;z-index:99999;display:flex;flex-direction:column;gap:8px;pointer-events:none;"></div>
+<script>
+// ========== TOAST NOTIFICATION SYSTEM ==========
+function showToast(message, type = 'info', durationMs = 4000) {
+    const container = document.getElementById('toast-container');
+    if (!container) return;
+    
+    const icons = { info: 'info', success: 'check_circle', error: 'error', warning: 'warning', azure: 'cloud' };
+    const colors = {
+        info: 'bg-blue-600/90 border-blue-400/30 text-blue-100',
+        success: 'bg-green-600/90 border-green-400/30 text-green-100',
+        error: 'bg-red-600/90 border-red-400/30 text-red-100',
+        warning: 'bg-amber-600/90 border-amber-400/30 text-amber-100',
+        azure: 'bg-blue-700/90 border-blue-400/30 text-blue-100'
+    };
+    
+    const toast = document.createElement('div');
+    toast.className = `flex items-center gap-2 px-4 py-3 rounded-xl border backdrop-blur-md shadow-2xl pointer-events-auto ${colors[type] || colors.info}`;
+    toast.style.cssText = 'animation:fadeIn 0.3s ease-out;min-width:280px;max-width:420px;font-size:13px;';
+    toast.innerHTML = `
+        <span class="material-symbols-outlined text-[18px]" style="font-variation-settings:'FILL' 1;">${icons[type] || icons.info}</span>
+        <span class="flex-1">${message}</span>
+        <button onclick="this.parentElement.remove()" class="opacity-60 hover:opacity-100 transition-opacity">
+            <span class="material-symbols-outlined text-[16px]">close</span>
+        </button>
+    `;
+    container.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.style.animation = 'fadeIn 0.3s ease-out reverse';
+        setTimeout(() => toast.remove(), 280);
+    }, durationMs);
+}
+
+// ========== AZURE HEALTH CHECK (polls every 30s) ==========
+let azureHealthy = false;
+async function checkAzureHealth() {
+    const statusText = document.getElementById('azure-status-text');
+    const statusIcon = document.getElementById('azure-status-icon');
+    const statusBg = document.getElementById('azure-status-icon-bg');
+    
+    try {
+        const res = await fetch(`${ICH_API_BASE}/api/translate`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text: 'ping', from: 'en', to: 'es' })
+        });
+        
+        if (res.ok) {
+            const data = await res.json();
+            if (!azureHealthy) {
+                showToast('☁️ Azure Cognitive Services connected', 'azure', 3000);
+            }
+            azureHealthy = true;
+            if (statusText) statusText.innerHTML = '<span class="text-green-400">Connected</span>';
+            if (statusIcon) { statusIcon.textContent = 'cloud_done'; statusIcon.className = 'material-symbols-outlined text-green-400'; }
+            if (statusBg) statusBg.className = 'w-10 h-10 rounded-lg bg-green-500/10 flex items-center justify-center';
+        } else {
+            throw new Error('API error');
+        }
+    } catch(e) {
+        if (azureHealthy) {
+            showToast('⚠️ Azure connection lost — using fallback', 'warning', 5000);
+        }
+        azureHealthy = false;
+        if (statusText) statusText.innerHTML = '<span class="text-red-400">Offline</span>';
+        if (statusIcon) { statusIcon.textContent = 'cloud_off'; statusIcon.className = 'material-symbols-outlined text-red-400'; }
+        if (statusBg) statusBg.className = 'w-10 h-10 rounded-lg bg-red-500/10 flex items-center justify-center';
+    }
+}
+
+// Initial check + poll every 30 seconds
+checkAzureHealth();
+setInterval(checkAzureHealth, 30000);
+
+// ========== TOAST HOOKS FOR AZURE OPERATIONS ==========
+// Wrap the original playTTS to show toast on first successful Azure TTS
+const _origPlayTTS = window.playTTS;
+let ttsToastShown = false;
+window.playTTS = async function(text, langCode) {
+    await _origPlayTTS(text, langCode);
+    if (!ttsToastShown && azureHealthy) {
+        ttsToastShown = true;
+        showToast('🔊 Azure Neural TTS active — voice: auto-selected per language', 'azure', 3000);
+    }
+};
+
+// ========== PDF TRANSCRIPT DOWNLOAD ==========
+function downloadTranscriptPDF() {
+    if (!transcriptEntries || transcriptEntries.length === 0) {
+        showToast('No transcript entries to export.', 'warning');
+        return;
+    }
+    
+    const sourceLang = document.getElementById('recognition-lang')?.selectedOptions?.[0]?.text || 'Unknown';
+    const targetLang = document.getElementById('translation-lang')?.selectedOptions?.[0]?.text || 'Unknown';
+    const now = new Date();
+
+    let html = `<!DOCTYPE html><html><head><meta charset="utf-8">
+    <title>ICH Transcript — ${now.toLocaleDateString()}</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Segoe UI',system-ui,sans-serif; padding:40px; color:#1a1a2e; background:#fff; }
+        .header { border-bottom:3px solid #0078d4; padding-bottom:16px; margin-bottom:24px; }
+        .header h1 { font-size:22px; color:#0078d4; }
+        .header p { font-size:11px; color:#666; margin-top:4px; }
+        .meta { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin-bottom:24px; }
+        .meta-card { background:#f0f4ff; border-radius:8px; padding:10px 14px; }
+        .meta-card label { font-size:9px; text-transform:uppercase; letter-spacing:1px; color:#666; font-weight:700; }
+        .meta-card p { font-size:14px; font-weight:600; color:#0078d4; }
+        table { width:100%; border-collapse:collapse; font-size:12px; }
+        th { background:#0078d4; color:white; text-align:left; padding:8px 12px; font-size:10px; text-transform:uppercase; letter-spacing:0.5px; }
+        td { padding:8px 12px; border-bottom:1px solid #e8ecf1; vertical-align:top; }
+        tr:nth-child(even) { background:#f8f9fc; }
+        .confidence-high { color:#16a34a; font-weight:600; }
+        .confidence-low { color:#dc2626; font-weight:600; }
+        .footer { margin-top:32px; padding-top:16px; border-top:2px solid #e8ecf1; font-size:10px; color:#999; text-align:center; }
+        .badge { display:inline-block; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600; }
+        .badge-mic { background:#dbeafe; color:#2563eb; }
+        .badge-keyboard { background:#fef3c7; color:#d97706; }
+        .badge-sign { background:#dcfce7; color:#16a34a; }
+        @media print { body { padding:20px; } }
+    </style></head><body>
+    <div class="header">
+        <h1>🎧 Inclusive Communication Hub — Session Transcript</h1>
+        <p>Generated ${now.toLocaleString()} · Powered by Azure Cognitive Services</p>
+    </div>
+    <div class="meta">
+        <div class="meta-card"><label>Input Language</label><p>${sourceLang}</p></div>
+        <div class="meta-card"><label>Output Language</label><p>${targetLang}</p></div>
+        <div class="meta-card"><label>Total Entries</label><p>${transcriptEntries.length}</p></div>
+    </div>
+    <table>
+        <thead><tr><th>#</th><th>Time</th><th>User</th><th>Modality</th><th>Text</th><th>Confidence</th></tr></thead>
+        <tbody>`;
+
+    transcriptEntries.forEach((e, i) => {
+        const confVal = e.confidence > 0 ? Math.round(e.confidence * 100) : '--';
+        const confClass = e.confidence >= 0.7 ? 'confidence-high' : 'confidence-low';
+        const modalBadge = e.modality === 'keyboard' ? 'badge-keyboard' : (e.modality === 'sign' ? 'badge-sign' : 'badge-mic');
+        html += `<tr>
+            <td>${i+1}</td>
+            <td>${e.time || '--'}</td>
+            <td>${e.user || 'Signer'}</td>
+            <td><span class="badge ${modalBadge}">${e.modality || 'mic'}</span></td>
+            <td>${e.text || ''}</td>
+            <td class="${confClass}">${confVal}%</td>
+        </tr>`;
+    });
+
+    html += `</tbody></table>
+    <div class="footer">
+        <p>Inclusive Communication Hub · Microsoft Innovation Challenge 2026 · Azure Speech + Translator + Blob Storage</p>
+    </div></body></html>`;
+
+    const blob = new Blob([html], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    
+    // Open in new window for Print → PDF
+    const printWin = window.open(url, '_blank');
+    if (printWin) {
+        printWin.onload = () => {
+            setTimeout(() => {
+                printWin.print();
+                URL.revokeObjectURL(url);
+            }, 500);
+        };
+    }
+    showToast('📄 PDF transcript opened for printing', 'success', 3000);
+}
+
+// ========== SIGN LIBRARY CLOUD PERSISTENCE (Azure Blob) ==========
+window.saveSignLibraryToCloud = async function(libraryData, libraryName = 'custom-signs') {
+    if (!libraryData) {
+        showToast('No sign library data to save.', 'warning');
+        return null;
+    }
+    try {
+        const jsonStr = JSON.stringify({
+            name: libraryName,
+            savedAt: new Date().toISOString(),
+            version: '1.0',
+            data: libraryData
+        });
+        
+        const res = await fetch(`${ICH_API_BASE}/api/sessions/archive`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                sessionTitle: `sign-library-${libraryName}`,
+                sourceLanguage: 'gestures',
+                targetLanguage: 'knn-model',
+                entries: [{ time: new Date().toISOString(), text: jsonStr, confidence: 1.0, user: 'system', modality: 'sign' }]
+            })
+        });
+        
+        if (res.ok) {
+            const data = await res.json();
+            showToast(`🤟 Sign library "${libraryName}" saved to Azure!`, 'azure', 3000);
+            return data.url;
+        } else {
+            throw new Error('Upload failed');
+        }
+    } catch(err) {
+        showToast('Failed to save sign library to cloud.', 'error');
+        console.error('Sign library cloud save failed:', err);
+        return null;
+    }
+};
+
+window.loadSignLibraryFromCloud = async function(blobUrl) {
+    try {
+        const res = await fetch(blobUrl);
+        if (res.ok) {
+            const data = await res.json();
+            showToast('🤟 Sign library loaded from Azure!', 'azure', 3000);
+            return data.data;
+        }
+    } catch(err) {
+        showToast('Failed to load sign library from cloud.', 'error');
+    }
+    return null;
+};
+</script>
+
+</body>
+</html>

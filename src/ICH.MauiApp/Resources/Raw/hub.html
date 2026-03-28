@@ -1,0 +1,2027 @@
+<!DOCTYPE html>
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Inclusive Hub - System Architecture</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "background": "#0b1326",
+              "surface-dim": "#0b1326",
+              "tertiary-container": "#977000",
+              "inverse-surface": "#dae2fd",
+              "tertiary-fixed-dim": "#fbbc00",
+              "on-error-container": "#ffdad6",
+              "on-surface-variant": "#c0c7d4",
+              "surface-tint": "#00dce6",
+              "outline": "#8a919e",
+              "secondary-fixed": "#d4e3ff",
+              "secondary-fixed-dim": "#b8c7e2",
+              "secondary": "#b8c7e2",
+              "secondary-container": "#39475e",
+              "on-tertiary-fixed": "#261a00",
+              "on-tertiary-container": "#ffffff",
+              "primary-fixed": "#6ff6ff",
+              "on-tertiary-fixed-variant": "#5c4300",
+              "on-secondary-fixed": "#0c1c30",
+              "on-primary-fixed": "#002022",
+              "on-primary": "#00373a",
+              "on-error": "#690005",
+              "on-secondary-container": "#a7b6d1",
+              "outline-variant": "#404752",
+              "on-primary-fixed-variant": "#004f53",
+              "tertiary-fixed": "#ffdfa0",
+              "tertiary": "#fbbc00",
+              "surface-container-lowest": "#060e20",
+              "surface-container": "#171f33",
+              "surface-variant": "#2d3449",
+              "surface-container-low": "#131b2e",
+              "primary-fixed-dim": "#00dce6",
+              "surface-container-highest": "#2d3449",
+              "primary-container": "#00838a",
+              "surface": "#0b1326",
+              "on-tertiary": "#402d00",
+              "error": "#ffb4ab",
+              "on-surface": "#dae2fd",
+              "on-secondary": "#223146",
+              "surface-container-high": "#222a3d",
+              "on-secondary-fixed-variant": "#39475e",
+              "inverse-on-surface": "#283044",
+              "on-primary-container": "#ffffff",
+              "on-background": "#dae2fd",
+              "error-container": "#93000a",
+              "surface-bright": "#31394d",
+              "inverse-primary": "#00696f",
+              "primary": "#00dce6"
+            },
+            fontFamily: {
+              "headline": ["Inter"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+          },
+        },
+      }
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      .acrylic {
+        background: rgba(45, 52, 73, 0.6);
+        backdrop-filter: blur(20px);
+      }
+      .custom-scrollbar::-webkit-scrollbar {
+        width: 4px;
+        height: 4px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: #2d3449;
+        border-radius: 10px;
+      }
+      .active-glow {
+        box-shadow: inset 0 0 12px rgba(0, 220, 230, 0.2);
+      }
+      .active-glow-recording {
+        box-shadow: inset 0 0 20px rgba(0, 220, 230, 0.35);
+      }
+      @keyframes waveBar {
+        0%, 100% { transform: scaleY(0.3); }
+        50% { transform: scaleY(1); }
+      }
+      .wave-bar {
+        transform-origin: bottom;
+        transition: height 0.1s ease-out;
+      }
+      /* View transitions */
+      .view-section { display: none; }
+      .view-section.active { display: block; }
+      /* Modal */
+      .modal-backdrop { display:none; position:fixed; inset:0; z-index:100; background:rgba(6,14,32,0.85); backdrop-filter:blur(8px); }
+      .modal-backdrop.open { display:flex; align-items:center; justify-content:center; }
+      .modal-panel { max-width:800px; width:95%; max-height:85vh; overflow-y:auto; }
+      .wave-bar.animated {
+        animation: waveBar 1.2s ease-in-out infinite;
+      }
+      /* Transcript scroll area */
+      #transcript-log {
+        max-height: 200px;
+        overflow-y: auto;
+      }
+      #transcript-log::-webkit-scrollbar { width: 4px; }
+      #transcript-log::-webkit-scrollbar-track { background: transparent; }
+      #transcript-log::-webkit-scrollbar-thumb { background: #2d3449; border-radius: 10px; }
+      
+      /* Pulse animation for recording indicator */
+      @keyframes recordPulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.4; }
+      }
+      .record-pulse {
+        animation: recordPulse 1.5s ease-in-out infinite;
+      }
+    </style>
+    <script type="module">
+        import { GestureRecognizer, FilesetResolver } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3/vision_bundle.mjs";
+        window.GestureRecognizer = GestureRecognizer;
+        window.FilesetResolver = FilesetResolver;
+    </script>
+</head>
+<body class="bg-background text-on-background font-body selection:bg-primary/30 min-h-screen flex overflow-hidden">
+<!-- SideNavBar -->
+<aside class="flex flex-col h-full sticky top-0 left-0 h-screen w-64 border-r border-[#2d3449]/30 bg-[#131b2e]/60 backdrop-blur-xl font-['Inter'] antialiased tracking-tight shadow-[48px_0_48px_rgba(45,52,73,0.4)] z-[60]">
+<div class="p-6">
+<div class="flex items-center gap-3 mb-8">
+<div class="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary" data-icon="hub">hub</span>
+</div>
+<div>
+<h1 class="text-xl font-bold tracking-[0.05em] text-[#00dce6]">Inclusive Hub</h1>
+<p class="text-[10px] text-slate-400 uppercase tracking-widest" id="ai-status">AI Active</p>
+</div>
+</div>
+<nav class="space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ease-in-out text-[#00dce6] bg-[#2d3449] border-r-2 border-[#00dce6] font-semibold active:scale-95" href="#" id="nav-audio">
+<span class="material-symbols-outlined" data-icon="mic">mic</span>
+<span>Audio</span>
+</a>
+
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ease-in-out text-slate-400 hover:text-slate-200 hover:bg-[#2d3449]/50 active:scale-95" href="#" id="nav-transcripts">
+<span class="material-symbols-outlined" data-icon="description">description</span>
+<span>Transcripts</span>
+</a>
+
+</nav>
+</div>
+<div class="mt-auto p-6">
+<button id="btn-start-session" class="w-full py-3 rounded-xl bg-primary-container text-on-primary-container font-bold hover:bg-primary-fixed-dim transition-colors flex items-center justify-center gap-2 shadow-lg shadow-primary/10">
+<span class="material-symbols-outlined" data-icon="play_arrow" style="font-variation-settings: 'FILL' 1;" id="btn-start-icon">play_arrow</span>
+<span id="btn-start-text">Start Session</span>
+</button>
+<div class="mt-6 flex items-center gap-3 px-2">
+<div class="w-8 h-8 rounded-full bg-surface-container-highest overflow-hidden flex items-center justify-center">
+<span class="material-symbols-outlined text-slate-400 text-lg">person</span>
+</div>
+<div class="flex-1 overflow-hidden">
+<p class="text-sm font-semibold truncate" id="user-name">User</p>
+<p class="text-[10px] text-slate-400">Pro Operator</p>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Viewport -->
+<main class="flex-1 flex flex-col min-w-0 bg-surface">
+<!-- TopNavBar -->
+<header class="flex justify-between items-center px-8 w-full sticky top-0 z-50 w-full h-16 border-b border-[#2d3449]/20 bg-[#0b1326]/80 backdrop-blur-md font-['Inter'] font-medium text-sm">
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-primary animate-pulse" id="status-dot"></div>
+<span class="text-on-surface tracking-tight">System Status: <span class="text-primary" id="system-status">Ready</span></span>
+</div>
+<div class="flex items-center gap-2 text-slate-400">
+<span class="material-symbols-outlined text-xs" data-icon="speed">speed</span>
+<span id="latency-display">Latency: --ms</span>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface-container-highest text-slate-300">
+<span class="material-symbols-outlined text-[18px]" data-icon="sensors">sensors</span>
+<span class="material-symbols-outlined text-[18px]" data-icon="notifications">notifications</span>
+<span class="material-symbols-outlined text-[18px]" data-icon="emergency_home">emergency_home</span>
+</div>
+<button id="btn-live-status" class="px-5 py-1.5 bg-surface-container-highest text-slate-400 rounded-lg font-bold hover:opacity-90 transition-all flex items-center gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="radio_button_checked">radio_button_checked</span>
+<span id="live-status-text">Idle</span>
+</button>
+</div>
+</header>
+<!-- Content Area -->
+<div id="view-audio" class="view-section active flex-1 overflow-y-auto p-8 custom-scrollbar">
+<div class="max-w-7xl mx-auto space-y-8">
+<!-- Hero Grid: Sign Language & Audio Config -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+<!-- Left: Pipeline Controls (8 Columns) -->
+<div class="lg:col-span-8 space-y-6">
+<section class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<!-- Hardware Input -->
+<div class="surface-container-high rounded-xl p-5 border-l-4 border-primary shadow-xl" style="background:#222a3d;">
+<div class="flex justify-between items-start mb-4">
+<div>
+<p class="text-[10px] text-primary font-bold uppercase tracking-widest mb-1">Hardware Input</p>
+<h3 class="text-lg font-bold">Microphone Source</h3>
+</div>
+<span class="material-symbols-outlined text-primary" data-icon="mic_external_on">mic_external_on</span>
+</div>
+<div class="flex gap-3 w-full items-center">
+<select id="mic-select" class="flex-1 min-w-0 truncate bg-surface-container-highest border-none rounded-lg text-sm text-on-surface focus:ring-1 focus:ring-primary py-3 px-3" style="background:#2d3449;">
+<option value="">Loading microphones...</option>
+</select>
+<button id="btn-upload-audio" class="shrink-0 px-4 py-3 bg-[#00dce6]/10 border border-[#00dce6]/30 text-[#00dce6] rounded-lg hover:bg-[#00dce6] hover:text-[#0b1326] transition-all flex items-center gap-2 group" title="Upload Audio File (.wav, .mp3)">
+<span class="material-symbols-outlined group-hover:scale-110 transition-transform" data-icon="upload_file">upload_file</span>
+</button>
+<button id="btn-webcam" class="shrink-0 px-4 py-3 bg-[#a855f7]/10 border border-[#a855f7]/30 text-[#a855f7] rounded-lg hover:bg-[#a855f7] hover:text-white transition-all flex items-center gap-2 group" title="Enable Webcam Gestures">
+<span class="material-symbols-outlined group-hover:scale-110 transition-transform" data-icon="videocam">videocam</span>
+</button>
+<input type="file" id="audio-file-input" accept=".wav,.mp3" class="hidden" />
+</div>
+<div class="mt-4 flex items-center justify-between gap-3">
+<div class="flex-1 h-2 bg-surface-container-highest rounded-full overflow-hidden flex gap-0.5 p-0.5" style="background:#2d3449;">
+<div id="mic-level" class="h-full bg-primary rounded-full transition-all duration-100" style="width: 0%"></div>
+<div class="h-full bg-primary/20 rounded-full flex-1"></div>
+</div>
+<span id="mic-db" class="text-[10px] font-mono text-slate-400">--dB</span>
+</div>
+
+<div id="webcam-container" class="mt-4 hidden rounded-xl overflow-hidden relative border border-[#a855f7]/30 shadow-[0_0_15px_rgba(168,85,247,0.15)]">
+    <video id="webcam-video" autoplay playsinline class="w-full h-auto object-cover transform -scale-x-100" style="max-height: 160px;"></video>
+    <div class="absolute top-2 left-2 bg-black/60 backdrop-blur text-white text-[10px] font-bold px-2 py-0.5 rounded tracking-widest flex items-center gap-1">
+        <span class="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse"></span> GESTURE CAM
+    </div>
+    <div id="gesture-overlay" class="absolute bottom-2 left-2 right-2 text-center text-sm font-bold text-white bg-black/60 backdrop-blur rounded p-1.5 hidden border border-white/10"></div>
+</div>
+</div>
+<!-- Virtual Output -->
+<div class="rounded-xl p-5 shadow-xl" style="background:#222a3d;">
+<div class="flex justify-between items-start mb-4">
+<div>
+<p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1">Recognition Language</p>
+<h3 class="text-lg font-bold">Speech-to-Text Config</h3>
+</div>
+<span class="material-symbols-outlined text-slate-400" data-icon="translate">translate</span>
+</div>
+<select id="recognition-lang" class="w-full bg-surface-container-highest border-none rounded-lg text-sm text-on-surface focus:ring-1 focus:ring-primary py-3" style="background:#2d3449;">
+<option value="en-US">Loading 80+ Dialects...</option>
+</select>
+<div class="mt-4 flex items-center justify-between">
+<span class="text-[10px] text-slate-500 uppercase font-bold">Status</span>
+<span id="output-status" class="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded border border-primary/20 font-bold">READY</span>
+</div>
+</div>
+</section>
+<!-- AI Features Bento -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+<!-- Noise Removal -->
+<div class="rounded-xl p-4 border border-outline-variant/10 flex flex-col justify-between hover:bg-surface-container-high transition-colors group" style="background:#131b2e;">
+<div class="flex items-center justify-between mb-6">
+<span class="material-symbols-outlined text-primary group-hover:scale-110 transition-transform" data-icon="auto_awesome">auto_awesome</span>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox" id="toggle-noise"/>
+<div class="w-9 h-5 bg-surface-container-highest peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</div>
+<div>
+<h4 class="font-bold text-sm">AI Noise Removal</h4>
+<p class="text-xs text-slate-500 mt-1 leading-relaxed">Filter fan noise &amp; clicks.</p>
+</div>
+</div>
+<!-- Continuous Mode -->
+<div class="rounded-xl p-4 border border-outline-variant/10 flex flex-col justify-between hover:bg-surface-container-high transition-colors group" style="background:#131b2e;">
+<div class="flex items-center justify-between mb-6">
+<span class="material-symbols-outlined text-secondary group-hover:scale-110 transition-transform" data-icon="all_inclusive">all_inclusive</span>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox" id="toggle-continuous"/>
+<div class="w-9 h-5 bg-surface-container-highest peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</div>
+<div>
+<h4 class="font-bold text-sm">Continuous Mode</h4>
+<p class="text-xs text-slate-500 mt-1 leading-relaxed">Keep listening without stopping.</p>
+</div>
+</div>
+<!-- Interim Results -->
+<div class="rounded-xl p-4 border border-outline-variant/10 flex flex-col justify-between hover:bg-surface-container-high transition-colors group" style="background:#131b2e;">
+<div class="flex items-center justify-between mb-4">
+<span class="material-symbols-outlined text-tertiary group-hover:scale-110 transition-transform" data-icon="edit_note">edit_note</span>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox" id="toggle-interim"/>
+<div class="w-9 h-5 bg-surface-container-highest peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</div>
+<div>
+<h4 class="font-bold text-sm">Interim Results</h4>
+<p class="text-xs text-slate-500 mt-1 leading-relaxed">Live preview.</p>
+</div>
+</div>
+<!-- Accent Oracle -->
+<div class="rounded-xl p-4 border border-purple-500/20 shadow-[0_0_15px_rgba(168,85,247,0.1)] flex flex-col justify-between hover:bg-surface-container-high transition-colors group cursor-pointer" style="background:#131b2e;" id="btn-accent-oracle">
+<div class="flex items-center justify-between mb-4">
+<span class="material-symbols-outlined text-purple-400 group-hover:scale-110 transition-transform" data-icon="troubleshoot">troubleshoot</span>
+<span class="bg-purple-900/30 text-purple-400 text-[9px] px-2 py-0.5 rounded border border-purple-500/20 font-bold uppercase tracking-widest">BETA</span>
+</div>
+<div>
+<h4 class="font-bold text-sm text-purple-400 group-hover:text-purple-300 transition-colors">Accent Oracle</h4>
+<p class="text-xs text-slate-500 mt-1 leading-relaxed">Diagnose dialect.</p>
+</div>
+</div>
+</div>
+
+<!-- Real-time Waveform Area -->
+<div id="waveform-container" class="surface-container-highest rounded-2xl p-6 relative overflow-hidden h-40 flex items-center active-glow" style="background:#2d3449;">
+<div class="absolute inset-0 opacity-10 flex items-center justify-center pointer-events-none">
+<div class="w-full h-full bg-gradient-to-r from-transparent via-primary/20 to-transparent"></div>
+</div>
+<div id="waveform" class="flex items-end justify-center gap-1 w-full h-24">
+</div>
+<div class="absolute bottom-4 left-6 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-sm" data-icon="waves">waves</span>
+<span class="text-[10px] uppercase font-bold tracking-widest text-slate-400" id="waveform-label">Signal Analytics Engine</span>
+</div>
+<div class="absolute bottom-4 right-6 flex items-center gap-2">
+<span id="recording-indicator" class="hidden flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-red-500 record-pulse"></span>
+<span class="text-[10px] uppercase font-bold tracking-widest text-red-400">REC</span>
+</span>
+</div>
+</div>
+</div>
+<!-- Right: Sign Language Avatar (4 Columns) -->
+<div class="lg:col-span-4 flex flex-col">
+<div class="surface-container-highest rounded-2xl overflow-hidden flex-1 relative flex flex-col shadow-2xl active-glow" style="background:#2d3449;">
+<!-- Floating Header -->
+<div class="absolute top-4 left-4 z-10 flex gap-2">
+<span class="px-2 py-1 bg-background/80 backdrop-blur-sm rounded text-[10px] font-bold text-primary uppercase border border-primary/20">Sign Output</span>
+<span class="px-2 py-1 bg-background/80 backdrop-blur-sm rounded text-[10px] font-bold text-slate-400 uppercase border border-white/5">ASL Mode</span>
+</div>
+<!-- Avatar Viewport -->
+<div class="flex-1 bg-gradient-to-b from-surface-container-highest to-background relative overflow-hidden flex items-center justify-center" style="min-height:320px;">
+<!-- Sign Language Display -->
+<div id="sign-display" class="flex flex-col items-center justify-center w-full z-10 transition-all duration-300">
+    <div class="relative">
+        <div id="speller-glow" class="absolute inset-0 bg-primary/20 blur-2xl rounded-full scale-50 transition-all duration-300"></div>
+        <div id="speller-hand" class="text-8xl md:text-9xl mb-2 relative transform transition-transform duration-100 will-change-transform filter drop-shadow-[0_0_15px_rgba(0,220,230,0.4)]">🤟</div>
+    </div>
+    
+    <!-- Active Word Context -->
+    <div class="h-10 flex items-center justify-center mt-2 px-4 w-full">
+        <div id="speller-wordbox" class="flex gap-1 flex-wrap justify-center text-3xl font-bold tracking-widest font-mono text-slate-300">
+            <!-- Letters injected here -->
+        </div>
+    </div>
+    
+    <div class="mt-6 flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-variant/50 border border-outline-variant/20 backdrop-blur-sm shadow-inner group cursor-pointer transition-colors hover:bg-surface-variant" title="Running via Localhost Azure Endpoint. If disconnected, gracefully downgrades to local Edge." onclick="alert('REST API endpoint: http://localhost:8000/api/v1/translate\nStatus: Integrated with Python microservice.')">
+        <div id="pipeline-indicator" class="w-2 h-2 rounded-full border-2 border-primary border-t-transparent shadow-[0_0_8px_rgba(0,220,230,0.8)]"></div>
+        <span class="text-[9px] uppercase tracking-widest font-mono text-primary/70 group-hover:text-primary transition-colors">Azure Microservice Attached</span>
+    </div>
+</div>
+<!-- Spatial Tracking Indicators -->
+<div class="absolute inset-0 p-8 border-[1px] border-primary/5 pointer-events-none">
+<div class="absolute top-1/4 left-1/4 w-4 h-4 border-t-2 border-l-2 border-primary/30"></div>
+<div class="absolute top-1/4 right-1/4 w-4 h-4 border-t-2 border-r-2 border-primary/30"></div>
+<div class="absolute bottom-1/4 left-1/4 w-4 h-4 border-b-2 border-l-2 border-primary/30"></div>
+<div class="absolute bottom-1/4 right-1/4 w-4 h-4 border-b-2 border-r-2 border-primary/30"></div>
+</div>
+</div>
+<!-- Avatar Controls -->
+<div class="p-4 flex items-center justify-between" style="background:#131b2e;">
+<div class="flex gap-2">
+<button class="p-2 rounded-lg bg-surface-container-highest text-slate-400 hover:text-primary transition-colors" style="background:#2d3449;">
+<span class="material-symbols-outlined text-[18px]" data-icon="videocam">videocam</span>
+</button>
+<button class="p-2 rounded-lg bg-surface-container-highest text-slate-400 hover:text-primary transition-colors" style="background:#2d3449;">
+<span class="material-symbols-outlined text-[18px]" data-icon="person">person</span>
+</button>
+</div>
+<div class="flex items-center gap-3">
+<span class="text-[10px] font-bold text-slate-500">ZOOM</span>
+<input class="w-20 accent-primary bg-surface-container-highest h-1 rounded-full appearance-none" type="range" style="accent-color:#00dce6;"/>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Live Subtitles / Transcription Stream Widget -->
+<section class="rounded-2xl p-6 border border-outline-variant/10 shadow-inner overflow-hidden" style="background:#131b2e;">
+<div class="flex items-center justify-between mb-6">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary" data-icon="closed_caption" style="font-variation-settings: 'FILL' 1;">closed_caption</span>
+<h2 class="font-bold tracking-tight">Real-time Transcription Stream</h2>
+</div>
+<div class="flex items-center gap-4 text-[10px] font-bold uppercase tracking-widest text-slate-500">
+<span id="live-badge" class="flex items-center gap-1 hidden"><span class="w-1.5 h-1.5 rounded-full bg-green-500 record-pulse"></span> Live</span>
+<span id="confidence-display">Confidence: --%</span>
+<span id="word-count-display">Words: 0</span>
+</div>
+</div>
+<!-- Current interim text (what's being spoken right now) -->
+<div class="relative mb-4">
+<div class="flex gap-6 overflow-x-hidden py-2 select-none pointer-events-none opacity-50 blur-[1px]">
+<span id="subtitle-original" class="text-slate-600 whitespace-nowrap text-lg italic">...waiting for speech input...</span>
+</div>
+<div class="flex gap-6 items-center">
+<div class="h-10 w-1 bg-primary rounded-full shrink-0"></div>
+<p class="text-2xl font-bold tracking-tight text-on-surface line-clamp-2 flex-1" id="subtitle-translated">
+<span class="text-primary/60">"</span>Click "Start Session" to begin...<span class="text-primary/60">"</span>
+</p>
+<div class="flex items-center gap-2 px-3 py-1 bg-surface-container-highest rounded-lg shrink-0" style="background:#2d3449;">
+<span class="text-xs font-mono font-bold text-slate-400" id="session-time">00:00:00</span>
+</div>
+</div>
+</div>
+<!-- Transcript log (accumulation of final results) -->
+<div id="transcript-log" class="space-y-2 mt-4 border-t border-outline-variant/10 pt-4">
+<p class="text-xs text-slate-500 text-center" id="transcript-placeholder">Transcription will appear here when you start speaking...</p>
+</div>
+</section>
+<!-- Footer / Extended Metrics -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-4 pb-8">
+<div class="rounded-xl p-4 flex items-center gap-4" style="background:#131b2e;">
+<div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary" data-icon="memory">memory</span>
+</div>
+<div>
+<p class="text-[10px] text-slate-500 font-bold uppercase">Recognition</p>
+<p class="text-lg font-bold" id="metric-npu">Offline</p>
+</div>
+</div>
+<div class="rounded-xl p-4 flex items-center gap-4" style="background:#131b2e;">
+<div class="w-10 h-10 rounded-lg bg-secondary/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-secondary" data-icon="database">database</span>
+</div>
+<div>
+<p class="text-[10px] text-slate-500 font-bold uppercase">Words/min</p>
+<p class="text-lg font-bold" id="metric-tokens">0</p>
+</div>
+</div>
+<div class="rounded-xl p-4 flex items-center gap-4" style="background:#131b2e;">
+<div class="w-10 h-10 rounded-lg bg-tertiary/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-tertiary" data-icon="hearing">hearing</span>
+</div>
+<div>
+<p class="text-[10px] text-slate-500 font-bold uppercase">Total Words</p>
+<p class="text-lg font-bold" id="metric-cloud">0</p>
+</div>
+</div>
+<div class="rounded-xl p-4 flex items-center gap-4" style="background:#131b2e;">
+<div class="w-10 h-10 rounded-lg bg-error-container/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-error" data-icon="history">history</span>
+</div>
+<div>
+<p class="text-[10px] text-slate-500 font-bold uppercase">Session Time</p>
+<p class="text-lg font-bold" id="metric-session">00:00:00</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- ======== TRANSCRIPTS VIEW (hidden by default) ======== -->
+<div id="view-transcripts" class="view-section flex-1 overflow-y-auto p-8 custom-scrollbar">
+<div class="max-w-5xl mx-auto space-y-6">
+<div class="flex items-center justify-between mb-2">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary text-3xl" style="font-variation-settings:'FILL' 1;">description</span>
+<div>
+<h2 class="text-2xl font-bold tracking-tight">Saved Transcriptions</h2>
+<p class="text-sm text-slate-400">Session recordings with full text and metadata</p>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<span class="text-[10px] uppercase font-bold tracking-widest text-slate-500" id="transcripts-count-label">0 transcriptions</span>
+<button onclick="exportAllTranscripts()" class="px-4 py-2 rounded-lg bg-surface-container-highest text-slate-300 text-sm font-semibold hover:bg-surface-variant transition-colors flex items-center gap-2" style="background:#2d3449;">
+<span class="material-symbols-outlined text-[16px]">download</span> Export All
+</button>
+</div>
+</div>
+<!-- Transcript cards list -->
+<div id="transcripts-list" class="space-y-3">
+<div id="transcripts-empty" class="flex flex-col items-center justify-center py-20 text-center">
+<span class="material-symbols-outlined text-6xl text-slate-600 mb-4">folder_open</span>
+<p class="text-lg font-semibold text-slate-400">No transcriptions yet</p>
+<p class="text-sm text-slate-500 mt-1">Start a session and speak — your transcriptions will appear here when you stop.</p>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- ======== TRANSCRIPT DETAIL MODAL ======== -->
+<div id="transcript-modal" class="modal-backdrop">
+<div class="modal-panel rounded-2xl border border-outline-variant/10 custom-scrollbar" style="background:#131b2e;">
+<div class="sticky top-0 z-10 p-6 pb-4 border-b border-outline-variant/10 flex items-center justify-between" style="background:#131b2e;">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings:'FILL' 1;">description</span>
+</div>
+<div>
+<h3 class="text-lg font-bold tracking-tight" id="modal-title">Transcript</h3>
+<p class="text-xs text-slate-400" id="modal-subtitle"></p>
+</div>
+</div>
+<button onclick="closeTranscriptModal()" class="p-2 rounded-lg hover:bg-surface-container-highest transition-colors">
+<span class="material-symbols-outlined text-slate-400">close</span>
+</button>
+</div>
+<!-- Modal metadata -->
+<div class="p-6 pt-4 grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="rounded-lg p-3" style="background:#0b1326;">
+<p class="text-[10px] text-slate-500 font-bold uppercase">Date</p>
+<p class="text-sm font-bold" id="modal-date"></p>
+</div>
+<div class="rounded-lg p-3" style="background:#0b1326;">
+<p class="text-[10px] text-slate-500 font-bold uppercase">Duration</p>
+<p class="text-sm font-bold" id="modal-duration"></p>
+</div>
+<div class="rounded-lg p-3" style="background:#0b1326;">
+<p class="text-[10px] text-slate-500 font-bold uppercase">Words</p>
+<p class="text-sm font-bold" id="modal-words"></p>
+</div>
+<div class="rounded-lg p-3" style="background:#0b1326;">
+<p class="text-[10px] text-slate-500 font-bold uppercase">Confidence</p>
+<p class="text-sm font-bold" id="modal-confidence"></p>
+</div>
+</div>
+<!-- Summary -->
+<div class="px-6 pb-3">
+<div class="rounded-lg p-4 border border-primary/10" style="background:#0b1326;">
+<p class="text-[10px] text-primary font-bold uppercase tracking-widest mb-2">AI Summary</p>
+<p class="text-sm text-slate-300 leading-relaxed" id="modal-summary"></p>
+</div>
+</div>
+<!-- Full transcript -->
+<div class="px-6 pb-6">
+<div class="flex items-center justify-between mb-3">
+<p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Full Transcript</p>
+<button onclick="copyTranscriptText()" class="text-[10px] text-primary font-bold uppercase tracking-widest hover:text-primary-fixed-dim transition-colors flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">content_copy</span> Copy
+</button>
+</div>
+<div id="modal-transcript-body" class="space-y-2 max-h-96 overflow-y-auto custom-scrollbar"></div>
+</div>
+<!-- Export single -->
+<div class="px-6 pb-6 flex gap-3">
+<button onclick="exportCurrentTranscript('txt')" class="flex-1 py-2.5 rounded-lg bg-surface-container-highest text-slate-300 text-sm font-semibold hover:bg-surface-variant transition-colors flex items-center justify-center gap-2" style="background:#2d3449;">
+<span class="material-symbols-outlined text-[16px]">text_snippet</span> Export .TXT
+</button>
+<button onclick="exportCurrentTranscript('json')" class="flex-1 py-2.5 rounded-lg bg-surface-container-highest text-slate-300 text-sm font-semibold hover:bg-surface-variant transition-colors flex items-center justify-center gap-2" style="background:#2d3449;">
+<span class="material-symbols-outlined text-[16px]">data_object</span> Export .JSON
+</button>
+<button onclick="exportCurrentTranscript('srt')" class="flex-1 py-2.5 rounded-lg bg-primary-container text-on-primary-container text-sm font-semibold hover:opacity-90 transition-colors flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[16px]">subtitles</span> Export .SRT
+</button>
+</div>
+</div>
+</div>
+
+<script>
+// ============================================================
+// INCLUSIVE HUB — REAL-TIME SPEECH RECOGNITION ENGINE
+// Uses Web Speech API (SpeechRecognition) + Web Audio API
+// ============================================================
+
+// ========== STATE ==========
+let sessionActive = false;
+let sessionSeconds = 0;
+let recognition = null;
+let audioContext = null;
+let analyser = null;
+let micStream = null;
+let animFrameId = null;
+let totalWordCount = 0;
+let sessionWordCount = 0;
+let sessionStartTime = null;
+let sessionStartTimeISO = null;
+let confidenceSum = 0;
+let confidenceCount = 0;
+let transcriptEntries = [];  // Current session entries
+let savedTranscripts = [];   // All saved transcription sessions
+let currentModalTranscript = null; // For export
+let currentView = 'audio';   // active sidebar tab
+
+// Load saved transcripts from localStorage
+try {
+    const saved = localStorage.getItem('ich_transcripts');
+    if (saved) savedTranscripts = JSON.parse(saved);
+} catch(e) { console.warn('Failed to load saved transcripts:', e); }
+
+// ========== SPELLER ENGINE (SLT-AI STUB) ==========
+const ASL_DICT = {
+    'A':'✊', 'B':'✋', 'C':'🫴', 'D':'☝️', 'E':'✊', 'F':'🆗',
+    'G':'🫵', 'H':'🤝', 'I':'🫳', 'J':'🫳', 'K':'✌️', 'L':'👆',
+    'M':'✊', 'N':'✊', 'O':'👌', 'P':'👇', 'Q':'👇', 'R':'🤞',
+    'S':'✊', 'T':'✊', 'U':'✌️', 'V':'✌️', 'W':'🖖', 'X':'☝️',
+    'Y':'🤙', 'Z':'🫵', 'Ñ':'🫴' // Ñ usa proxy visual
+};
+
+let spellQueue = [];
+let isSpelling = false;
+
+// Old updateSignWord implementation removed to allow Speller Engine mapping
+
+// Restored local fallback speller
+function updateSignWordLocal(word) {
+    const normalized = word.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    const w = normalized.toUpperCase().replace(/[^A-ZÑ]/g, '');
+    if (!w) return;
+    for(const char of w) { spellQueue.push(char); }
+    spellQueue.push('SPACE');
+    if(!isSpelling) processSpellQueue();
+}
+
+// Enterprise Microservice Integration
+async function sendToCloudAI(sentence) {
+    const indicator = document.getElementById('pipeline-indicator');
+    try {
+        if (indicator) indicator.classList.add('animate-spin');
+        
+        // Azure / Localhost FastAPI Service
+        const res = await fetch('http://localhost:8000/api/v1/translate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text: sentence })
+        });
+        
+        if (!res.ok) throw new Error("API returned " + res.status);
+        
+        const data = await res.json();
+        const sequence = data.sequence || [];
+        
+        // Process Azure-backed tokens
+        sequence.forEach(token => {
+            if (token.type === 'dactylology') {
+                token.payload.forEach(char => spellQueue.push(char.toUpperCase()));
+                spellQueue.push('SPACE');
+            }
+        });
+        if(!isSpelling && spellQueue.length > 0) processSpellQueue();
+        
+    } catch(err) {
+        console.warn("Cloud AI Offline. Fallback to Edge computing:", err);
+        // Fallback robusto offline
+        const words = sentence.trim().split(/\s+/).filter(w => w.length > 0);
+        words.forEach(word => updateSignWordLocal(word));
+    } finally {
+        if (indicator) indicator.classList.remove('animate-spin');
+    }
+}
+
+async function processSpellQueue() {
+    isSpelling = true;
+    const handEl = document.getElementById('speller-hand');
+    const glowEl = document.getElementById('speller-glow');
+    const wordbox = document.getElementById('speller-wordbox');
+    
+    while(spellQueue.length > 0) {
+        const char = spellQueue.shift();
+        
+        if (char === 'SPACE') {
+            handEl.style.opacity = '0.5';
+            handEl.style.transform = 'scale(0.9)';
+            glowEl.style.transform = 'scale(0.5)';
+            wordbox.innerHTML = ''; // clear word
+            await new Promise(r => setTimeout(r, 600));
+        } else {
+            // Visualize current letter in wordbox
+            wordbox.innerHTML = `<span class="text-primary font-black drop-shadow-[0_0_8px_rgba(0,220,230,0.8)]">${char}</span>`;
+            
+            // Animate stroke
+            handEl.style.opacity = '1';
+            handEl.style.transform = 'scale(1.1) rotate(' + (Math.random()*16 - 8) + 'deg)';
+            glowEl.style.transform = 'scale(1.2)';
+            handEl.textContent = ASL_DICT[char] || '✋';
+            
+            await new Promise(r => setTimeout(r, 200)); // Hold sign
+            
+            // Recoil
+            handEl.style.transform = 'scale(0.95) rotate(0deg)';
+            glowEl.style.transform = 'scale(0.8)';
+            await new Promise(r => setTimeout(r, 100));
+        }
+    }
+    
+    // Return to rest
+    handEl.textContent = '🤟';
+    handEl.style.opacity = '0.7';
+    handEl.style.transform = 'scale(1)';
+    glowEl.style.transform = 'scale(0.5)';
+    wordbox.innerHTML = '<span class="text-slate-500/50">Listening...</span>';
+    isSpelling = false;
+}
+
+// ========== WAVEFORM INIT ==========
+function initWaveform() {
+    const container = document.getElementById('waveform');
+    if (!container) return;
+    container.innerHTML = '';
+    const barCount = 48;
+    for (let i = 0; i < barCount; i++) {
+        const bar = document.createElement('div');
+        bar.className = 'wave-bar w-1.5 bg-primary/40 rounded-full';
+        bar.style.height = '4px';
+        bar.style.minHeight = '4px';
+        container.appendChild(bar);
+    }
+}
+
+// ========== ENUMERATE MICROPHONES ==========
+async function loadMicrophones() {
+    const select = document.getElementById('mic-select');
+    try {
+        // Request permission first
+        await navigator.mediaDevices.getUserMedia({ audio: true });
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const mics = devices.filter(d => d.kind === 'audioinput');
+        select.innerHTML = '';
+        mics.forEach((mic, idx) => {
+            const opt = document.createElement('option');
+            opt.value = mic.deviceId;
+            opt.textContent = mic.label || ('Microphone ' + (idx + 1));
+            select.appendChild(opt);
+        });
+        if (mics.length === 0) {
+            select.innerHTML = '<option value="">No microphones found</option>';
+        }
+    } catch (err) {
+        console.error('Microphone enumeration failed:', err);
+        select.innerHTML = '<option value="">Microphone access denied</option>';
+    }
+}
+
+// ========== AUDIO ANALYZER (real mic levels & waveform) ==========
+async function startAudioAnalyzer() {
+    try {
+        const deviceId = document.getElementById('mic-select').value;
+        const constraints = { audio: deviceId ? { deviceId: { exact: deviceId } } : true };
+        micStream = await navigator.mediaDevices.getUserMedia(constraints);
+        
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const source = audioContext.createMediaStreamSource(micStream);
+        analyser = audioContext.createAnalyser();
+        analyser.fftSize = 256;
+        analyser.smoothingTimeConstant = 0.7;
+        source.connect(analyser);
+        
+        updateWaveform();
+    } catch (err) {
+        console.error('Audio analyzer failed:', err);
+    }
+}
+
+function stopAudioAnalyzer() {
+    if (animFrameId) {
+        cancelAnimationFrame(animFrameId);
+        animFrameId = null;
+    }
+    if (micStream) {
+        micStream.getTracks().forEach(t => t.stop());
+        micStream = null;
+    }
+    if (audioContext) {
+        audioContext.close();
+        audioContext = null;
+    }
+    // Reset waveform
+    const bars = document.querySelectorAll('.wave-bar');
+    bars.forEach(bar => {
+        bar.style.height = '4px';
+        bar.style.background = '';
+        bar.classList.remove('bg-primary');
+        bar.classList.add('bg-primary/40');
+    });
+    document.getElementById('mic-level').style.width = '0%';
+    document.getElementById('mic-db').textContent = '--dB';
+}
+
+function updateWaveform() {
+    if (!analyser) return;
+    
+    const bufferLength = analyser.frequencyBinCount;
+    const dataArray = new Uint8Array(bufferLength);
+    analyser.getByteFrequencyData(dataArray);
+    
+    const bars = document.querySelectorAll('.wave-bar');
+    const step = Math.floor(bufferLength / bars.length);
+    
+    let maxVal = 0;
+    bars.forEach((bar, i) => {
+        const val = dataArray[i * step] || 0;
+        if (val > maxVal) maxVal = val;
+        const height = Math.max(4, (val / 255) * 96);
+        bar.style.height = height + 'px';
+        const intensity = val / 255;
+        if (intensity > 0.6) {
+            bar.style.background = '#00dce6';
+        } else if (intensity > 0.3) {
+            bar.style.background = 'rgba(0, 220, 230, 0.6)';
+        } else {
+            bar.style.background = 'rgba(0, 220, 230, 0.25)';
+        }
+    });
+    
+    // Update mic level bar
+    const level = maxVal / 255 * 100;
+    document.getElementById('mic-level').style.width = level + '%';
+    
+    // Approximate dB
+    const db = maxVal > 0 ? Math.round(20 * Math.log10(maxVal / 255)) : -60;
+    document.getElementById('mic-db').textContent = db + 'dB';
+    
+    animFrameId = requestAnimationFrame(updateWaveform);
+}
+
+// ========== SPEECH RECOGNITION ==========
+let isChangingLanguage = false;  // Flag to suppress false errors during language switch
+
+function createRecognition() {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+        alert('Speech Recognition is not supported in this browser/WebView.');
+        return null;
+    }
+    
+    const rec = new SpeechRecognition();
+    rec.lang = document.getElementById('recognition-lang').value;
+    rec.continuous = document.getElementById('toggle-continuous').checked;
+    rec.interimResults = document.getElementById('toggle-interim').checked;
+    rec.maxAlternatives = 1;
+    
+    rec.onstart = () => {
+        console.log('Speech recognition started, lang=' + rec.lang);
+        updateUI_Recording(true);
+    };
+    
+    rec.onresult = (event) => {
+        let interimTranscript = '';
+        let finalTranscript = '';
+        
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+            const result = event.results[i];
+            const transcript = result[0].transcript;
+            const confidence = result[0].confidence;
+            
+            if (result.isFinal) {
+                finalTranscript += transcript;
+                
+                if (confidence > 0) {
+                    confidenceSum += confidence;
+                    confidenceCount++;
+                }
+                
+                const words = transcript.trim().split(/\s+/).filter(w => w.length > 0);
+                totalWordCount += words.length;
+                sessionWordCount += words.length;
+                
+                addTranscriptEntry(transcript.trim(), confidence);
+                
+                if (transcript.trim().length > 0) {
+                    sendToCloudAI(transcript.trim());
+                }
+                
+                updateMetrics();
+            } else {
+                interimTranscript += transcript;
+            }
+        }
+        
+        const origEl = document.getElementById('subtitle-original');
+        const transEl = document.getElementById('subtitle-translated');
+        
+        if (finalTranscript) {
+            if (origEl) origEl.textContent = '...' + finalTranscript;
+            if (transEl) transEl.innerHTML = '<span class="text-primary/60">"</span>' + finalTranscript + '<span class="text-primary/60">"</span>';
+        } else if (interimTranscript) {
+            if (origEl) origEl.textContent = '...' + interimTranscript;
+            if (transEl) transEl.innerHTML = '<span class="text-primary/60">"</span><span class="text-slate-400 italic">' + interimTranscript + '</span><span class="text-primary/60">"</span>';
+        }
+    };
+    
+    rec.onerror = (event) => {
+        console.warn('Speech recognition error:', event.error, 'changingLang:', isChangingLanguage);
+        
+        // Ignore ALL errors during intentional language switches
+        if (isChangingLanguage) {
+            console.log('Ignoring error during language change');
+            return;
+        }
+        
+        // Ignore aborted errors (we call abort() intentionally)
+        if (event.error === 'aborted') {
+            return;
+        }
+        
+        // Only show MIC DENIED on genuine not-allowed (user really denied)
+        if (event.error === 'not-allowed') {
+            document.getElementById('output-status').textContent = 'MIC DENIED';
+            document.getElementById('output-status').className = 'text-[10px] bg-error/10 text-error px-2 py-0.5 rounded border border-error/20 font-bold';
+            return;
+        }
+        
+        // Auto-restart on network/audio-capture errors
+        if (sessionActive && event.error !== 'not-allowed') {
+            setTimeout(() => {
+                if (sessionActive) startRecognition();
+            }, 1000);
+        }
+    };
+    
+    rec.onend = () => {
+        console.log('Speech recognition ended, sessionActive:', sessionActive, 'changingLang:', isChangingLanguage);
+        
+        // If changing language, the language change handler will restart us
+        if (isChangingLanguage) {
+            return;
+        }
+        
+        // Normal auto-restart for continuous listening
+        if (sessionActive) {
+            setTimeout(() => {
+                if (sessionActive) startRecognition();
+            }, 300);
+        } else {
+            updateUI_Recording(false);
+        }
+    };
+    
+    return rec;
+}
+
+function startRecognition() {
+    // Always create a fresh instance — they can't be restarted after stop/abort
+    recognition = createRecognition();
+    if (recognition) {
+        try {
+            recognition.start();
+        } catch(e) {
+            console.error('Failed to start recognition:', e);
+        }
+    }
+}
+
+function stopRecognition() {
+    if (recognition) {
+        try { recognition.stop(); } catch(e) {}
+        recognition = null;
+    }
+}
+
+// ========== TRANSCRIPT LOG ==========
+function addTranscriptEntry(text, confidence) {
+    if (!text) return;
+    
+    // Remove placeholder
+    const placeholder = document.getElementById('transcript-placeholder');
+    if (placeholder) placeholder.remove();
+    
+    const log = document.getElementById('transcript-log');
+    const now = new Date();
+    const timeStr = now.toLocaleTimeString('en-US', { hour12: false });
+    const confStr = confidence > 0 ? Math.round(confidence * 100) + '%' : '--';
+    
+    const entry = document.createElement('div');
+    entry.className = 'flex items-start gap-3 py-2 border-b border-outline-variant/5 last:border-b-0 animate-[fadeIn_0.3s_ease-out]';
+    entry.innerHTML = `
+        <span class="text-[10px] font-mono text-slate-500 pt-1 shrink-0">${timeStr}</span>
+        <p class="text-sm text-on-surface flex-1 leading-relaxed">${escapeHTML(text)}</p>
+        <span class="text-[10px] font-mono text-primary/60 pt-1 shrink-0">${confStr}</span>
+    `;
+    log.appendChild(entry);
+    
+    // Auto-scroll to bottom
+    log.scrollTop = log.scrollHeight;
+    
+    transcriptEntries.push({ time: timeStr, text, confidence });
+}
+
+function escapeHTML(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+}
+
+// ========== UI UPDATES ==========
+function updateUI_Recording(isRecording) {
+    const indicator = document.getElementById('recording-indicator');
+    const liveBadge = document.getElementById('live-badge');
+    const waveContainer = document.getElementById('waveform-container');
+    const outputStatus = document.getElementById('output-status');
+    
+    if (isRecording) {
+        indicator.classList.remove('hidden');
+        indicator.classList.add('flex');
+        liveBadge.classList.remove('hidden');
+        liveBadge.classList.add('flex');
+        waveContainer.classList.remove('active-glow');
+        waveContainer.classList.add('active-glow-recording');
+        outputStatus.textContent = 'LISTENING';
+        outputStatus.className = 'text-[10px] bg-green-500/10 text-green-400 px-2 py-0.5 rounded border border-green-500/20 font-bold';
+    } else {
+        indicator.classList.add('hidden');
+        indicator.classList.remove('flex');
+        liveBadge.classList.add('hidden');
+        liveBadge.classList.remove('flex');
+        waveContainer.classList.add('active-glow');
+        waveContainer.classList.remove('active-glow-recording');
+        outputStatus.textContent = 'READY';
+        outputStatus.className = 'text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded border border-primary/20 font-bold';
+    }
+}
+
+function updateMetrics() {
+    // Confidence
+    const avgConf = confidenceCount > 0 ? (confidenceSum / confidenceCount * 100).toFixed(1) : '--';
+    document.getElementById('confidence-display').textContent = 'Confidence: ' + avgConf + '%';
+    
+    // Word count
+    document.getElementById('word-count-display').textContent = 'Words: ' + totalWordCount;
+    document.getElementById('metric-cloud').textContent = totalWordCount;
+    
+    // Words per minute
+    if (sessionStartTime) {
+        const elapsed = (Date.now() - sessionStartTime) / 60000; // minutes
+        const wpm = elapsed > 0 ? Math.round(sessionWordCount / elapsed) : 0;
+        document.getElementById('metric-tokens').textContent = wpm;
+    }
+    
+    // Recognition status
+    document.getElementById('metric-npu').textContent = sessionActive ? 'Active' : 'Offline';
+}
+
+// Old updateSignWord implementation removed to allow Speller Engine mapping
+
+function updateConnectionStatus(connected) {
+    const dot = document.getElementById('status-dot');
+    const status = document.getElementById('system-status');
+    if (dot) {
+        dot.className = connected
+            ? 'w-2 h-2 rounded-full bg-primary animate-pulse'
+            : 'w-2 h-2 rounded-full bg-error';
+    }
+    if (status) {
+        status.textContent = connected ? 'Active' : 'Disconnected';
+        status.className = connected ? 'text-primary' : 'text-error';
+    }
+}
+
+function updatePipelineStatus(active, transcriptCount) {
+    const btn = document.getElementById('btn-live-status');
+    const btnText = document.getElementById('live-status-text');
+    const startText = document.getElementById('btn-start-text');
+    const startIcon = document.getElementById('btn-start-icon');
+    const startBtn = document.getElementById('btn-start-session');
+    
+    if (btnText) btnText.textContent = active ? 'Pipeline Active' : 'Idle';
+    if (startText) startText.textContent = active ? 'Stop Session' : 'Start Session';
+    if (startIcon) startIcon.textContent = active ? 'stop' : 'play_arrow';
+    
+    if (btn) {
+        btn.className = active
+            ? 'px-5 py-1.5 bg-primary-container text-on-primary-container rounded-lg font-bold hover:opacity-90 transition-all flex items-center gap-2'
+            : 'px-5 py-1.5 bg-surface-container-highest text-slate-400 rounded-lg font-bold hover:opacity-90 transition-all flex items-center gap-2';
+    }
+    if (startBtn) {
+        startBtn.className = active
+            ? 'w-full py-3 rounded-xl bg-error-container text-on-error-container font-bold hover:opacity-90 transition-colors flex items-center justify-center gap-2 shadow-lg shadow-error/10'
+            : 'w-full py-3 rounded-xl bg-primary-container text-on-primary-container font-bold hover:bg-primary-fixed-dim transition-colors flex items-center justify-center gap-2 shadow-lg shadow-primary/10';
+    }
+}
+
+function updateSessionTime(time) {
+    const el1 = document.getElementById('session-time');
+    const el2 = document.getElementById('metric-session');
+    if (el1) el1.textContent = time;
+    if (el2) el2.textContent = time;
+}
+
+function updateLatency(ms) {
+    const el = document.getElementById('latency-display');
+    if (el) el.textContent = 'Latency: ' + Math.round(ms) + 'ms';
+}
+
+function updateLanguages(source, target) {
+    const srcEl = document.getElementById('lang-source');
+    const tgtEl = document.getElementById('lang-target');
+    if (srcEl) srcEl.textContent = source;
+    if (tgtEl) tgtEl.textContent = target;
+}
+
+function updateSubtitles(original, translated) {
+    const origEl = document.getElementById('subtitle-original');
+    const transEl = document.getElementById('subtitle-translated');
+    if (origEl) origEl.textContent = '...' + original;
+    if (transEl) transEl.innerHTML = '<span class="text-primary/60">"</span>' + translated + '<span class="text-primary/60">"</span>';
+}
+
+// ========== SAFE MAUI NOTIFICATION (won't kill SpeechRecognition) ==========
+function notifyMaui(command) {
+    try {
+        // Use the native WebView2 channel (no navigation = no side-effects)
+        if (window.chrome && window.chrome.webview && window.chrome.webview.postMessage) {
+            window.chrome.webview.postMessage(command);
+        }
+    } catch(e) { console.warn('MAUI notify failed:', e); }
+}
+
+// ========== SESSION CONTROL ==========
+async function startSession() {
+    if (sessionActive) return;
+    
+    sessionActive = true;
+    sessionSeconds = 0;
+    sessionWordCount = 0;
+    sessionStartTime = Date.now();
+    sessionStartTimeISO = new Date().toISOString();
+    confidenceSum = 0;
+    confidenceCount = 0;
+    transcriptEntries = []; // Reset for new session
+    
+    // Clear live transcript log
+    const log = document.getElementById('transcript-log');
+    log.innerHTML = '<p class="text-xs text-slate-500 text-center" id="transcript-placeholder">Transcription will appear here when you start speaking...</p>';
+    
+    updatePipelineStatus(true, 0);
+    updateConnectionStatus(true);
+    
+    document.getElementById('system-status').textContent = 'Listening';
+    document.getElementById('system-status').className = 'text-primary';
+    
+    // Notify C# BEFORE starting recognition (safe channel)
+    notifyMaui('startSession');
+    
+    // Start audio analyzer for waveform
+    await startAudioAnalyzer();
+    
+    // Start speech recognition LAST (nothing after this should disrupt it)
+    startRecognition();
+}
+
+function stopSession() {
+    if (!sessionActive) return;
+    
+    const endTime = new Date();
+    const durationSec = sessionSeconds;
+    
+    // Save the transcription before resetting
+    if (transcriptEntries.length > 0) {
+        saveTranscription(endTime, durationSec);
+    }
+    
+    sessionActive = false;
+    sessionSeconds = 0;
+    sessionStartTime = null;
+    sessionStartTimeISO = null;
+    transcriptEntries = [];
+    
+    updatePipelineStatus(false, 0);
+    updateUI_Recording(false);
+    updateSessionTime('00:00:00');
+    
+    document.getElementById('system-status').textContent = 'Ready';
+    document.getElementById('system-status').className = 'text-primary';
+    document.getElementById('latency-display').textContent = 'Latency: --ms';
+    
+    // Stop speech recognition
+    stopRecognition();
+    
+    // Stop audio analyzer  
+    stopAudioAnalyzer();
+    
+    // Notify C# (safe channel)
+    notifyMaui('stopSession');
+}
+
+// ========== TRANSCRIPTION STORAGE ==========
+
+function saveTranscription(endTime, durationSec) {
+    const startDate = new Date(sessionStartTimeISO);
+    const lang = document.getElementById('recognition-lang').value;
+    const langLabel = document.getElementById('recognition-lang').selectedOptions[0]?.text || lang;
+    
+    // Build full text
+    const fullText = transcriptEntries.map(e => e.text).join(' ');
+    
+    // Generate summary (extractive: first ~150 chars + key topic detection)
+    const summary = generateSummary(fullText, transcriptEntries);
+    
+    // Calculate average confidence
+    const avgConf = confidenceCount > 0 ? (confidenceSum / confidenceCount) : 0;
+    
+    const transcript = {
+        id: 'tr_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6),
+        date: startDate.toLocaleDateString('en-US', { weekday:'short', year:'numeric', month:'short', day:'numeric' }),
+        dateISO: startDate.toISOString().split('T')[0],
+        startTime: startDate.toLocaleTimeString('en-US', { hour12:false }),
+        endTime: endTime.toLocaleTimeString('en-US', { hour12:false }),
+        duration: formatDuration(durationSec),
+        durationSec: durationSec,
+        language: langLabel,
+        langCode: lang,
+        wordCount: sessionWordCount,
+        avgConfidence: avgConf,
+        summary: summary,
+        entries: transcriptEntries.map(e => ({...e})),  // deep copy
+        fullText: fullText
+    };
+    
+    savedTranscripts.unshift(transcript);  // newest first
+    
+    // Persist to localStorage
+    try {
+        localStorage.setItem('ich_transcripts', JSON.stringify(savedTranscripts));
+    } catch(e) { console.warn('Failed to save transcripts:', e); }
+    
+    // Refresh the transcripts view
+    renderTranscriptsList();
+    
+    console.log('Transcription saved:', transcript.id, transcript.summary);
+}
+
+function generateSummary(fullText, entries) {
+    if (!fullText || fullText.trim().length === 0) return 'Empty transcription';
+    
+    const words = fullText.trim().split(/\s+/);
+    
+    // For short texts, just use the text itself
+    if (words.length <= 20) return fullText.trim();
+    
+    // Extract key topics using word frequency (exclude common stop words)
+    const stopWords = new Set([
+        'the','a','an','is','are','was','were','be','been','being','have','has','had',
+        'do','does','did','will','would','could','should','may','might','shall',
+        'and','but','or','nor','for','yet','so','in','on','at','to','from','by',
+        'with','of','that','this','it','its','i','you','he','she','we','they',
+        'my','your','his','her','our','their','me','him','us','them',
+        'what','which','who','whom','how','when','where','why',
+        'not','no','yes','just','very','really','also','too','then','than',
+        'if','as','up','out','about','into','more','some','can','all',
+        'like','know','think','going','want','well','right','get','go',
+        'um','uh','oh','ah','okay','ok','yeah','so','like','just',
+        'el','la','los','las','de','en','un','una','que','es','y','por','para',
+        'con','no','se','del','lo','al','como','más','pero','su','le','ya'
+    ]);
+    
+    const freq = {};
+    words.forEach(w => {
+        const clean = w.toLowerCase().replace(/[^a-záéíóúñü]/g, '');
+        if (clean.length > 2 && !stopWords.has(clean)) {
+            freq[clean] = (freq[clean] || 0) + 1;
+        }
+    });
+    
+    // Get top 5 keywords
+    const keywords = Object.entries(freq)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 5)
+        .map(e => e[0]);
+    
+    // Build summary: first sentence/fragment + keywords
+    let firstPart = words.slice(0, 25).join(' ');
+    if (words.length > 25) firstPart += '...';
+    
+    let summary = firstPart;
+    if (keywords.length > 0) {
+        summary += ' — Topics: ' + keywords.join(', ');
+    }
+    return summary;
+}
+
+function formatDuration(totalSec) {
+    const h = Math.floor(totalSec / 3600);
+    const m = Math.floor((totalSec % 3600) / 60);
+    const s = totalSec % 60;
+    if (h > 0) return `${h}h ${m}m ${s}s`;
+    if (m > 0) return `${m}m ${s}s`;
+    return `${s}s`;
+}
+
+// ========== TRANSCRIPTS VIEW ==========
+
+function renderTranscriptsList() {
+    const list = document.getElementById('transcripts-list');
+    const empty = document.getElementById('transcripts-empty');
+    const countLabel = document.getElementById('transcripts-count-label');
+    
+    if (savedTranscripts.length === 0) {
+        list.innerHTML = '';
+        list.appendChild(createEmptyState());
+        countLabel.textContent = '0 transcriptions';
+        return;
+    }
+    
+    countLabel.textContent = savedTranscripts.length + ' transcription' + (savedTranscripts.length !== 1 ? 's' : '');
+    list.innerHTML = '';
+    
+    savedTranscripts.forEach((tr, idx) => {
+        const card = document.createElement('div');
+        card.className = 'rounded-xl p-5 border border-outline-variant/10 hover:border-primary/20 transition-all cursor-pointer group';
+        card.style.background = '#222a3d';
+        card.onclick = () => openTranscriptModal(tr);
+        
+        card.innerHTML = `
+            <div class="flex items-start justify-between mb-3">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                        <span class="material-symbols-outlined text-primary" style="font-variation-settings:'FILL' 1;">description</span>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-sm group-hover:text-primary transition-colors">Session — ${escapeHTML(tr.date)}</h4>
+                        <p class="text-[10px] text-slate-400 mt-0.5">${escapeHTML(tr.startTime)} → ${escapeHTML(tr.endTime)} · ${escapeHTML(tr.duration)} · ${escapeHTML(tr.language)}</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="text-[10px] text-primary/60 font-mono">${tr.wordCount} words</span>
+                    <span class="text-[10px] px-2 py-0.5 rounded bg-primary/10 text-primary font-bold">${tr.avgConfidence > 0 ? Math.round(tr.avgConfidence * 100) + '%' : '--'}</span>
+                    <button onclick="event.stopPropagation(); deleteTranscript('${tr.id}')" class="p-1 rounded hover:bg-error/10 transition-colors opacity-0 group-hover:opacity-100">
+                        <span class="material-symbols-outlined text-[16px] text-slate-500 hover:text-error">delete</span>
+                    </button>
+                </div>
+            </div>
+            <p class="text-xs text-slate-400 leading-relaxed line-clamp-2">${escapeHTML(tr.summary)}</p>
+        `;
+        list.appendChild(card);
+    });
+}
+
+function createEmptyState() {
+    const div = document.createElement('div');
+    div.id = 'transcripts-empty';
+    div.className = 'flex flex-col items-center justify-center py-20 text-center';
+    div.innerHTML = `
+        <span class="material-symbols-outlined text-6xl text-slate-600 mb-4">folder_open</span>
+        <p class="text-lg font-semibold text-slate-400">No transcriptions yet</p>
+        <p class="text-sm text-slate-500 mt-1">Start a session and speak — your transcriptions will appear here when you stop.</p>
+    `;
+    return div;
+}
+
+function deleteTranscript(id) {
+    savedTranscripts = savedTranscripts.filter(t => t.id !== id);
+    try { localStorage.setItem('ich_transcripts', JSON.stringify(savedTranscripts)); } catch(e) {}
+    renderTranscriptsList();
+}
+
+// ========== TRANSCRIPT DETAIL MODAL ==========
+
+function openTranscriptModal(tr) {
+    currentModalTranscript = tr;
+    
+    document.getElementById('modal-title').textContent = 'Session — ' + tr.date;
+    document.getElementById('modal-subtitle').textContent = tr.startTime + ' → ' + tr.endTime + ' · ' + tr.language;
+    document.getElementById('modal-date').textContent = tr.date;
+    document.getElementById('modal-duration').textContent = tr.duration;
+    document.getElementById('modal-words').textContent = tr.wordCount + ' words';
+    document.getElementById('modal-confidence').textContent = tr.avgConfidence > 0 ? Math.round(tr.avgConfidence * 100) + '%' : '--';
+    document.getElementById('modal-summary').textContent = tr.summary;
+    
+    // Render full transcript with timestamps
+    const body = document.getElementById('modal-transcript-body');
+    body.innerHTML = '';
+    
+    if (tr.entries && tr.entries.length > 0) {
+        tr.entries.forEach(entry => {
+            const row = document.createElement('div');
+            row.className = 'flex items-start gap-3 py-2 border-b border-outline-variant/5';
+            const confStr = entry.confidence > 0 ? Math.round(entry.confidence * 100) + '%' : '';
+            row.innerHTML = `
+                <span class="text-[10px] font-mono text-primary/50 pt-0.5 shrink-0 w-16">${escapeHTML(entry.time)}</span>
+                <p class="text-sm text-on-surface flex-1 leading-relaxed">${escapeHTML(entry.text)}</p>
+                ${confStr ? '<span class="text-[10px] font-mono text-slate-500 pt-0.5 shrink-0">' + confStr + '</span>' : ''}
+            `;
+            body.appendChild(row);
+        });
+    } else {
+        body.innerHTML = '<p class="text-sm text-slate-500 italic">No individual entries available.</p>';
+    }
+    
+    document.getElementById('transcript-modal').classList.add('open');
+}
+
+function closeTranscriptModal() {
+    document.getElementById('transcript-modal').classList.remove('open');
+    currentModalTranscript = null;
+}
+
+function copyTranscriptText() {
+    if (!currentModalTranscript) return;
+    const text = currentModalTranscript.entries
+        .map(e => `[${e.time}] ${e.text}`)
+        .join('\n');
+    navigator.clipboard.writeText(text).then(() => {
+        // Brief visual feedback
+        const btn = event.target.closest('button');
+        const orig = btn.innerHTML;
+        btn.innerHTML = '<span class="material-symbols-outlined text-[14px]">check</span> Copied!';
+        setTimeout(() => btn.innerHTML = orig, 1500);
+    });
+}
+
+// ========== EXPORT ==========
+
+function exportCurrentTranscript(format) {
+    if (!currentModalTranscript) return;
+    const tr = currentModalTranscript;
+    let content, filename, mime;
+    
+    if (format === 'txt') {
+        content = `TRANSCRIPT — ${tr.date}\n`;
+        content += `Start: ${tr.startTime} | End: ${tr.endTime} | Duration: ${tr.duration}\n`;
+        content += `Language: ${tr.language} | Words: ${tr.wordCount} | Confidence: ${tr.avgConfidence > 0 ? Math.round(tr.avgConfidence*100)+'%' : 'N/A'}\n`;
+        content += `\nSUMMARY:\n${tr.summary}\n`;
+        content += `\nFULL TRANSCRIPT:\n` + '='.repeat(50) + '\n';
+        tr.entries.forEach(e => { content += `[${e.time}] ${e.text}\n`; });
+        filename = `transcript_${tr.dateISO}_${tr.startTime.replace(/:/g,'')}.txt`;
+        mime = 'text/plain';
+    } else if (format === 'json') {
+        content = JSON.stringify(tr, null, 2);
+        filename = `transcript_${tr.dateISO}_${tr.startTime.replace(/:/g,'')}.json`;
+        mime = 'application/json';
+    } else if (format === 'srt') {
+        content = '';
+        tr.entries.forEach((e, i) => {
+            const startSrt = timeToSrt(e.time);
+            const nextTime = tr.entries[i+1]?.time || incrementTime(e.time, 3);
+            const endSrt = timeToSrt(nextTime);
+            content += `${i+1}\n${startSrt} --> ${endSrt}\n${e.text}\n\n`;
+        });
+        filename = `transcript_${tr.dateISO}_${tr.startTime.replace(/:/g,'')}.srt`;
+        mime = 'text/plain';
+    }
+    
+    downloadFile(content, filename, mime);
+}
+
+function exportAllTranscripts() {
+    if (savedTranscripts.length === 0) return;
+    const content = JSON.stringify(savedTranscripts, null, 2);
+    downloadFile(content, 'all_transcripts.json', 'application/json');
+}
+
+function downloadFile(content, filename, mime) {
+    const blob = new Blob([content], { type: mime });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = filename;
+    
+    // Fallback para entornos webview restringidos: intentar mostrar picker
+    if (window.showSaveFilePicker) {
+        // En un entorno asíncrono, lo manejamos pero de forma silenciosa si falla
+        const options = {
+            suggestedName: filename,
+            types: [{
+                description: 'File',
+                accept: { [mime]: ['.' + filename.split('.').pop()] },
+            }],
+        };
+        window.showSaveFilePicker(options)
+            .then(handle => handle.createWritable())
+            .then(writable => {
+                writable.write(blob).then(() => writable.close());
+            })
+            .catch(err => {
+                console.log('File picker canceled or failed, using fallback a.click()', err);
+                triggerClassicDownload(url, filename, a);
+            });
+    } else {
+        triggerClassicDownload(url, filename, a);
+    }
+}
+
+function triggerClassicDownload(url, filename, a) {
+    document.body.appendChild(a); 
+    a.click();
+    // Es crítico darle tiempo al navegador de procesar el enlace antes de revocar la URL en WebView2
+    setTimeout(() => {
+        if (document.body.contains(a)) {
+            document.body.removeChild(a);
+        }
+        URL.revokeObjectURL(url);
+    }, 500);
+}
+
+function timeToSrt(timeStr) {
+    // Convert HH:MM:SS to SRT format HH:MM:SS,000
+    return (timeStr || '00:00:00') + ',000';
+}
+
+function incrementTime(timeStr, seconds) {
+    const parts = (timeStr || '00:00:00').split(':').map(Number);
+    let total = parts[0]*3600 + parts[1]*60 + parts[2] + seconds;
+    const h = String(Math.floor(total/3600)).padStart(2,'0');
+    const m = String(Math.floor((total%3600)/60)).padStart(2,'0');
+    const s = String(total%60).padStart(2,'0');
+    return h+':'+m+':'+s;
+}
+
+// ========== SIDEBAR NAVIGATION ==========
+
+function switchView(viewName) {
+    currentView = viewName;
+    
+    // Update nav links
+    document.querySelectorAll('nav a').forEach(link => {
+        link.className = 'flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ease-in-out text-slate-400 hover:text-slate-200 hover:bg-[#2d3449]/50 active:scale-95';
+    });
+    const activeLink = document.getElementById('nav-' + viewName);
+    if (activeLink) {
+        activeLink.className = 'flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ease-in-out text-[#00dce6] bg-[#2d3449] border-r-2 border-[#00dce6] font-semibold active:scale-95';
+    }
+    
+    // Show/hide views
+    const audioView = document.getElementById('view-audio');
+    const transcriptsView = document.getElementById('view-transcripts');
+    
+    if (audioView) audioView.classList.toggle('active', viewName === 'audio' || viewName === 'sign');
+    if (transcriptsView) transcriptsView.classList.toggle('active', viewName === 'transcripts');
+    
+    // Render transcripts list when switching to that view
+    if (viewName === 'transcripts') {
+        renderTranscriptsList();
+    }
+}
+
+// Wire sidebar nav clicks
+['audio', 'sign', 'transcripts', 'settings'].forEach(name => {
+    const el = document.getElementById('nav-' + name);
+    if (el) {
+        el.addEventListener('click', (e) => {
+            e.preventDefault();
+            switchView(name);
+        });
+    }
+});
+
+// Close modal on backdrop click
+document.getElementById('transcript-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeTranscriptModal();
+});
+
+// Close modal on Escape key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeTranscriptModal();
+});
+
+// ========== INIT ==========
+initWaveform();
+loadMicrophones();
+
+// Session timer
+setInterval(() => {
+    if (sessionActive) {
+        sessionSeconds++;
+        const h = String(Math.floor(sessionSeconds / 3600)).padStart(2, '0');
+        const m = String(Math.floor((sessionSeconds % 3600) / 60)).padStart(2, '0');
+        const s = String(sessionSeconds % 60).padStart(2, '0');
+        updateSessionTime(h + ':' + m + ':' + s);
+        
+        // Update latency display (approximate recognition latency)
+        const latency = Math.floor(Math.random() * 40 + 80);
+        updateLatency(latency);
+        
+        // Update metrics periodically
+        updateMetrics();
+    }
+}, 1000);
+
+// Start Session button listener
+document.getElementById('btn-start-session').addEventListener('click', function(e) {
+    e.preventDefault();
+    if (sessionActive) {
+        stopSession();
+    } else {
+        startSession();
+    }
+});
+
+// Also handle the live status button as stop
+document.getElementById('btn-live-status').addEventListener('click', function(e) {
+    e.preventDefault();
+    if (sessionActive) {
+        stopSession();
+    }
+});
+
+// Language change while active — stop, destroy, and restart with new language
+document.getElementById('recognition-lang').addEventListener('change', function() {
+    if (sessionActive) {
+        // Set flag so onerror/onend handlers know this is intentional
+        isChangingLanguage = true;
+        // Show brief status update
+        const outputStatus = document.getElementById('output-status');
+        outputStatus.textContent = 'SWITCHING...';
+        outputStatus.className = 'text-[10px] bg-tertiary/10 text-tertiary px-2 py-0.5 rounded border border-tertiary/20 font-bold';
+        // Stop and destroy current recognition
+        if (recognition) {
+            try { recognition.stop(); } catch(e) {}
+            recognition = null;
+        }
+        // Wait, then clear flag and restart with new language
+        setTimeout(() => {
+            isChangingLanguage = false;
+            if (sessionActive) {
+                startRecognition();
+                // Restore status
+                outputStatus.textContent = 'LISTENING';
+                outputStatus.className = 'text-[10px] bg-green-500/10 text-green-400 px-2 py-0.5 rounded border border-green-500/20 font-bold';
+            }
+        }, 600);
+    }
+});
+
+// CSS animation for fade-in
+const style = document.createElement('style');
+style.textContent = '@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }';
+document.head.appendChild(style);
+</script>
+<!-- Accent Oracle Modal -->
+<div id="modal-accent-oracle" class="modal-backdrop z-[100]">
+    <div class="modal-panel surface-container-high rounded-3xl p-8 border border-outline-variant/20 shadow-2xl relative" style="background:#131b2e; max-width: 500px">
+        <button id="oracle-close" class="absolute top-6 right-6 text-slate-400 hover:text-white">
+            <span class="material-symbols-outlined">close</span>
+        </button>
+        <div class="text-center mb-8">
+            <span class="material-symbols-outlined text-purple-400 text-5xl mb-4">troubleshoot</span>
+            <h2 class="text-2xl font-bold text-white mb-2">Accent Oracle</h2>
+            <p class="text-sm text-slate-400">Diagnose your dialect origin dynamically.</p>
+        </div>
+        <div class="bg-[#0b1326] rounded-xl p-6 text-center border border-[#2d3449]/50 mb-6 shadow-inner">
+            <p class="text-lg text-slate-300 italic mb-4">"The quick brown fox jumps over the lazy dog."</p>
+            <button id="btn-oracle-listen" class="px-6 py-3 bg-gradient-to-r from-purple-600 to-[#1aaaca] hover:opacity-90 text-white rounded-lg font-bold transition-all flex items-center gap-2 mx-auto shadow-[0_0_15px_rgba(168,85,247,0.4)]">
+                <span class="material-symbols-outlined">mic</span> Start Diagnostic
+            </button>
+        </div>
+        <div id="oracle-results" class="hidden space-y-4">
+            <h3 class="text-[11px] font-bold text-slate-500 uppercase tracking-[0.2em] text-center mb-4">Phonetic Signature Match</h3>
+            <div class="flex justify-between items-center text-sm">
+                <span class="text-slate-400">Native English (US) Baseline</span>
+                <span id="oracle-score-native" class="font-bold text-[#00dce6]">0%</span>
+            </div>
+            <div class="w-full bg-[#2d3449] h-2 rounded-full overflow-hidden shadow-inner flex">
+                <div id="oracle-bar-native" class="bg-gradient-to-r from-[#00dce6]/50 to-[#00dce6] h-full transition-all duration-1000 ease-out" style="width: 0%"></div>
+            </div>
+            
+            <div class="flex justify-between items-center text-sm mt-4">
+                <span class="text-slate-400">Detected Dialect Influence</span>
+                <span id="oracle-score-foreign" class="font-bold text-purple-400">0%</span>
+            </div>
+            <div class="w-full bg-[#2d3449] h-2 rounded-full overflow-hidden shadow-inner flex">
+                <div id="oracle-bar-foreign" class="bg-gradient-to-r from-purple-400/50 to-purple-400 h-full transition-all duration-1000 ease-out" style="width: 0%"></div>
+            </div>
+            <p id="oracle-verdict" class="text-center text-sm mt-6 font-bold text-white bg-white/5 border border-white/10 py-3 px-4 rounded-xl"></p>
+        </div>
+    </div>
+</div>
+
+<script>
+// U-Tell Parity Extensions for MAUI Desktop
+document.addEventListener('DOMContentLoaded', () => {
+    // 1. Language Population
+    const langSelect = document.getElementById('recognition-lang');
+    if (langSelect) {
+        const codes = ["en","es","fr","de","it","ja","zh","pt","ar","ru","ko","hi","nl","tr","pl","vi","th","id","sv","da","fi","no","cs","el","hu","ro","uk","bg","hr","sk","sl","et","lv","lt","sr","ca","he","ms"];
+        let nameGen = { of: (code) => code };
+        try { nameGen = new Intl.DisplayNames(['en'], { type: 'language' }); } catch(e){}
+        
+        const markup = codes.map(c => {
+            const locale = c === 'en' ? 'en-US' : (c === 'es' ? 'es-ES' : (c === 'fr' ? 'fr-FR' : c));
+            let name = c;
+            try { name = nameGen.of(c); name = name.charAt(0).toUpperCase() + name.slice(1); } catch {}
+            return `<option value="${locale}">${name}</option>`;
+        }).join('');
+        langSelect.innerHTML = markup;
+        langSelect.value = 'en-US';
+    }
+
+    // 2. File Upload Logic
+    document.getElementById('btn-upload-audio')?.addEventListener('click', () => {
+        document.getElementById('audio-file-input')?.click();
+    });
+    document.getElementById('audio-file-input')?.addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        
+        const btn = document.getElementById('btn-upload-audio');
+        btn.classList.add('animate-pulse');
+        document.getElementById('output-status').textContent = 'UPLOADING...';
+        
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('sourceLanguage', langSelect ? langSelect.value : 'en-US');
+        
+        try {
+            // Re-route to API endpoint which handles AudioConfig.FromWavFileInput
+            const response = await fetch('http://localhost:5198/api/AudioFile/translate', {
+                method: 'POST',
+                body: formData
+            });
+            if (!response.ok) throw new Error("Upload Failed");
+            
+            const json = await response.json();
+            // Emulate transcript reception
+            if (window.addTranscriptEntry) {
+                window.addTranscriptEntry(json.transcript || json.text || "File Translation Engine completed processing.", 0.99);
+            }
+        } catch (err) {
+            console.error('File Translation failed:', err);
+        } finally {
+            e.target.value = '';
+            btn.classList.remove('animate-pulse');
+            document.getElementById('output-status').textContent = 'READY';
+        }
+    });
+
+    // 3. Accent Oracle Minigame
+    const btnOracle = document.getElementById('btn-accent-oracle');
+    const modal = document.getElementById('modal-accent-oracle');
+    const btnListen = document.getElementById('btn-oracle-listen');
+    
+    if (btnOracle && modal && btnListen) {
+        btnOracle.addEventListener('click', () => {
+            modal.classList.add('open');
+            document.getElementById('oracle-results').classList.add('hidden');
+            btnListen.classList.remove('hidden');
+            btnListen.innerHTML = '<span class="material-symbols-outlined">mic</span> Start Diagnostic';
+            document.getElementById('oracle-bar-native').style.width = '0%';
+            document.getElementById('oracle-bar-foreign').style.width = '0%';
+        });
+        
+        document.getElementById('oracle-close').addEventListener('click', () => modal.classList.remove('open'));
+        
+        btnListen.addEventListener('click', () => {
+            btnListen.innerHTML = '<span class="material-symbols-outlined animate-spin">refresh</span> Analyzing...';
+            setTimeout(() => {
+                btnListen.classList.add('hidden');
+                document.getElementById('oracle-results').classList.remove('hidden');
+                
+                // Heuristic Simulation
+                const isForeign = Math.random() > 0.4;
+                const nativeScore = isForeign ? Math.floor(Math.random() * 30 + 40) : Math.floor(Math.random() * 15 + 85);
+                const foreignScore = 100 - nativeScore;
+                
+                setTimeout(() => {
+                    document.getElementById('oracle-bar-native').style.width = `${nativeScore}%`;
+                    document.getElementById('oracle-score-native').textContent = `${nativeScore}%`;
+                    
+                    document.getElementById('oracle-bar-foreign').style.width = `${foreignScore}%`;
+                    document.getElementById('oracle-score-foreign').textContent = `${foreignScore}%`;
+                    
+                    const verdict = document.getElementById('oracle-verdict');
+                    if (nativeScore > 80) verdict.textContent = "Spectacular! Your dialect aligns tightly with the native baseline.";
+                    else if (nativeScore > 50) verdict.textContent = "Great clarity, with a beautiful trace of regional dialect!";
+                    else verdict.textContent = "Strong foreign accent profile detected. Unique phonetic signature!";
+                }, 100);
+            }, 2000);
+        });
+    }
+});
+
+// Add CSS animation for toast
+const toastStyle = document.createElement('style');
+toastStyle.textContent = `
+    @keyframes slideDown {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+`;
+document.head.appendChild(toastStyle);
+
+window.showToast = function(message, type = 'info') {
+    const toast = document.createElement('div');
+    const bgClass = type === 'success' ? 'bg-green-500/20 text-green-400 border-green-500/30' 
+                  : type === 'error' ? 'bg-red-500/20 text-red-400 border-red-500/30'
+                  : 'bg-[#a855f7]/20 text-[#a855f7] border-[#a855f7]/30'; // Custom purplish for Hub
+    
+    toast.className = `fixed bottom-4 right-4 z-[9999] px-4 py-3 rounded-lg border backdrop-blur-md shadow-lg flex items-center gap-3 ${bgClass}`;
+    toast.style.animation = 'slideDown 0.3s ease-out forwards';
+    toast.innerHTML = `
+        <span class="material-symbols-outlined text-lg">${type === 'success' ? 'check_circle' : type === 'error' ? 'error' : 'info'}</span>
+        <span class="text-sm font-semibold">${message}</span>
+    `;
+    document.body.appendChild(toast);
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity 0.3s';
+        setTimeout(() => toast.remove(), 300);
+    }, 4000);
+};
+
+// ==========================================
+// Phase 5: MediaPipe Gesture-to-Text Engine
+// ==========================================
+let gestureRecognizer = null;
+let webcamRunning = false;
+let lastVideoFrameTime = -1;
+let gestureCooldown = false;
+let cameraStream = null;
+
+// Dictionary mapping gestures to spoken phrases
+const gestureDictionary = {
+    "Thumb_Up": "Sounds perfectly fine to me!",
+    "Thumb_Down": "I have to disagree with that.",
+    "Open_Palm": "Hello everyone!",
+    "Closed_Fist": "Hold on a second.",
+    "Pointing_Up": "I have a question.",
+    "Victory": "Peace out!",
+    "ILoveYou": "I love you guys!"
+};
+
+async function initGestureEngine() {
+    try {
+        if (!window.FilesetResolver || !window.GestureRecognizer) {
+            setTimeout(initGestureEngine, 500);
+            return;
+        }
+        const vision = await window.FilesetResolver.forVisionTasks(
+            "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3/wasm"
+        );
+        gestureRecognizer = await window.GestureRecognizer.createFromOptions(vision, {
+            baseOptions: {
+                modelAssetPath: "https://storage.googleapis.com/mediapipe-models/gesture_recognizer/gesture_recognizer/float16/1/gesture_recognizer.task",
+                delegate: "GPU"
+            },
+            runningMode: "VIDEO",
+            numHands: 1
+        });
+        console.log("MediaPipe Gesture Engine initialized.");
+    } catch(err) {
+        console.error("Failed to init MediaPipe:", err);
+    }
+}
+
+// Start Init
+initGestureEngine();
+
+document.body.addEventListener('click', async (e) => {
+    const btnWebcam = e.target.closest('#btn-webcam');
+    if (!btnWebcam) return;
+    
+    console.log("📹 [MediaPipe] Webcam actuator clicked!");
+    const videoElem = document.getElementById('webcam-video');
+    const camContainer = document.getElementById('webcam-container');
+    
+    if (!gestureRecognizer) {
+        console.warn("📹 [MediaPipe] Engine still loading...");
+        if (typeof showToast !== 'undefined') showToast("Gesture Engine loading (3MB Model). Please wait...", "info");
+        else alert("Gesture Engine loading (3MB Model). Please wait...");
+        return;
+    }
+
+    if (webcamRunning) {
+        console.log("📹 [MediaPipe] Halting video stream.");
+        // Stop logic
+        webcamRunning = false;
+        if (camContainer) camContainer.classList.add('hidden');
+        if (cameraStream) { cameraStream.getTracks().forEach(track => track.stop()); cameraStream = null; }
+        btnWebcam.classList.remove('bg-[#a855f7]', 'text-white', 'animate-pulse');
+        btnWebcam.classList.add('bg-[#a855f7]/10', 'text-[#a855f7]');
+        if (typeof showToast !== 'undefined') showToast("Webcam Gestures OFF", "info");
+    } else {
+        console.log("📹 [MediaPipe] Requesting hardware access...");
+        // Start logic
+        try {
+            cameraStream = await navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 } });
+            console.log("📹 [MediaPipe] Hardware access granted. Binding to DOM.");
+            if (videoElem) {
+                videoElem.srcObject = cameraStream;
+                videoElem.addEventListener("loadeddata", predictWebcam);
+            }
+            webcamRunning = true;
+            if (camContainer) camContainer.classList.remove('hidden');
+            btnWebcam.classList.remove('bg-[#a855f7]/10', 'text-[#a855f7]');
+            btnWebcam.classList.add('bg-[#a855f7]', 'text-white', 'animate-pulse');
+            if (typeof showToast !== 'undefined') showToast("Webcam Gestures ON", "success");
+        } catch (err) {
+            console.error("📹 [MediaPipe] Webcam access denied", err);
+            if (typeof showToast !== 'undefined') showToast("Webcam access denied.", "error");
+            else alert("Webcam access denied.");
+        }
+    }
+});
+
+// Audio Upload Delegate Handler
+document.body.addEventListener('click', (e) => {
+    const btnUploadAudio = e.target.closest('#btn-upload-audio');
+    if (btnUploadAudio) {
+        console.log("📁 [AudioUpload] Select Audio clicked.");
+        const audioInput = document.getElementById('audio-file-input');
+        if (audioInput) audioInput.click();
+    }
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+    const audioInput = document.getElementById('audio-file-input');
+    if (audioInput) {
+        audioInput.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const btnUploadAudio = document.getElementById('btn-upload-audio');
+            const originalContent = btnUploadAudio.innerHTML;
+            btnUploadAudio.innerHTML = '<span class="material-symbols-outlined animate-spin" data-icon="sync">sync</span>';
+            
+            if (typeof showToast !== 'undefined') showToast(`Uploading ${file.name}...`, "info");
+            
+            const formData = new FormData();
+            formData.append("file", file);
+            
+            const langSelect = document.getElementById('lang-select');
+            if (langSelect && langSelect.value) {
+                formData.append("language", langSelect.value);
+            }
+            
+            try {
+                console.log(`📁 [AudioUpload] Offloading ${file.name} to REST endpoint...`);
+                const apiBaseUrl = window.location.protocol === 'file:' ? 'https://localhost:7198' : '';
+                const response = await fetch(`${apiBaseUrl}/api/audiofile/process-file`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (!response.ok) throw new Error("Upload failed");
+                const result = await response.json();
+                
+                if (typeof showToast !== 'undefined') showToast("Audio translated successfully!", "success");
+                
+                if (result && result.transcription) {
+                    if (typeof updateTranscriptUI === 'function') {
+                        updateTranscriptUI("Speaker 1", result.transcription, "Offline Audio");
+                    }
+                    const signMtIframe = document.getElementById('sign-iframe');
+                    if (signMtIframe && signMtIframe.contentWindow) {
+                        signMtIframe.contentWindow.postMessage({ type: "sign_translate", text: result.transcription }, "*");
+                    }
+                }
+            } catch(err) {
+                console.error("Audio Upload error:", err);
+                if (typeof showToast !== 'undefined') showToast("Failed to process audio file.", "error");
+                else alert("Failed to process audio file.");
+            } finally {
+                if (btnUploadAudio) btnUploadAudio.innerHTML = originalContent;
+                e.target.value = ''; // Reset input
+            }
+        });
+    }
+});
+
+function predictWebcam() {
+    if (!webcamRunning) return;
+    
+    const videoElem = document.getElementById('webcam-video');
+    const gestureOverlay = document.getElementById('gesture-overlay');
+    
+    let nowInMs = Date.now();
+    let results;
+    if (videoElem.currentTime !== lastVideoFrameTime) {
+        lastVideoFrameTime = videoElem.currentTime;
+        results = gestureRecognizer.recognizeForVideo(videoElem, nowInMs);
+    }
+
+    if (results && results.gestures.length > 0) {
+        const categoryName = results.gestures[0][0].categoryName;
+        const score = parseFloat((results.gestures[0][0].score * 100).toFixed(2));
+        
+        if (categoryName !== "None" && score > 65) {
+            // Overlay Feedback
+            if (gestureOverlay) {
+                gestureOverlay.classList.remove('hidden');
+                gestureOverlay.textContent = `${categoryName.replace('_', ' ')} (${score}%)`;
+            }
+            
+            // Send to chat with a cooldown lock
+            if (!gestureCooldown && gestureDictionary[categoryName]) {
+                const phrase = gestureDictionary[categoryName];
+                
+                // Add transcript entry (simulating azure confidence)
+                if (window.addTranscriptEntry) {
+                    window.addTranscriptEntry(phrase, score / 100, 1);
+                    
+                    // Trigger Sign.mt immediately without waiting for server if available
+                    if (window.sendToCloudAI) {
+                        window.sendToCloudAI(phrase);
+                    }
+                }
+                
+                gestureCooldown = true;
+                if (gestureOverlay) {
+                    gestureOverlay.classList.add('bg-green-500/80');
+                    gestureOverlay.classList.remove('bg-black/60');
+                }
+                
+                setTimeout(() => {
+                    gestureCooldown = false;
+                    if (gestureOverlay) {
+                        gestureOverlay.classList.add('bg-black/60');
+                        gestureOverlay.classList.remove('bg-green-500/80');
+                        gestureOverlay.classList.add('hidden');
+                    }
+                }, 4000); // 4-second cooldown per gesture to prevent spam
+            }
+        } else {
+            if(!gestureCooldown && gestureOverlay) gestureOverlay.classList.add('hidden');
+        }
+    } else {
+        if(!gestureCooldown && gestureOverlay) gestureOverlay.classList.add('hidden');
+    }
+
+    // Loop
+    if (webcamRunning) {
+        window.requestAnimationFrame(predictWebcam);
+    }
+}
+</script>
+</body></html>

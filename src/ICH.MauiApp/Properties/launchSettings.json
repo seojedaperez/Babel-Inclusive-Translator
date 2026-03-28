@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "ICH.MauiApp (Packaged)": {
+      "commandName": "MsixPackage",
+      "nativeDebugging": false
+    }
+  }
+}

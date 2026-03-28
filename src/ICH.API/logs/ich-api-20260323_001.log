@@ -1,0 +1,418 @@
+2026-03-23 14:30:28.515 -03:00 [INF] Executed DbCommand (20ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-03-23 14:30:28.643 -03:00 [INF] Executed DbCommand (78ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+
+IF EXISTS
+    (SELECT *
+     FROM [sys].[objects] o
+     WHERE [o].[type] = 'U'
+     AND [o].[is_ms_shipped] = 0
+     AND NOT EXISTS (SELECT *
+         FROM [sys].[extended_properties] AS [ep]
+         WHERE [ep].[major_id] = [o].[object_id]
+             AND [ep].[minor_id] = 0
+             AND [ep].[class] = 1
+             AND [ep].[name] = N'microsoft_database_tools_support'
+    )
+)
+SELECT 1 ELSE SELECT 0
+2026-03-23 14:30:28.650 -03:00 [INF] Inclusive Communication Hub API starting...
+2026-03-23 14:30:28.661 -03:00 [INF] User profile is available. Using 'C:\Users\ASUS\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.
+2026-03-23 14:30:28.718 -03:00 [WRN] The ASP.NET Core developer certificate is not trusted. For information about trusting the ASP.NET Core developer certificate, see https://aka.ms/aspnet/https-trust-dev-cert.
+2026-03-23 14:30:28.754 -03:00 [ERR] Hosting failed to start
+System.IO.IOException: Failed to bind to address https://127.0.0.1:49940: address already in use.
+ ---> Microsoft.AspNetCore.Connections.AddressInUseException: Solo se permite un uso de cada dirección de socket (protocolo/dirección de red/puerto)
+ ---> System.Net.Sockets.SocketException (10048): Solo se permite un uso de cada dirección de socket (protocolo/dirección de red/puerto)
+   at System.Net.Sockets.Socket.UpdateStatusAfterSocketErrorAndThrowException(SocketError error, Boolean disconnectOnFailure, String callerName)
+   at System.Net.Sockets.Socket.DoBind(EndPoint endPointSnapshot, SocketAddress socketAddress)
+   at System.Net.Sockets.Socket.Bind(EndPoint localEP)
+   at Microsoft.AspNetCore.Server.Kestrel.Transport.Sockets.SocketTransportOptions.CreateDefaultBoundListenSocket(EndPoint endpoint)
+   at Microsoft.AspNetCore.Server.Kestrel.Transport.Sockets.SocketConnectionListener.Bind()
+   --- End of inner exception stack trace ---
+   at Microsoft.AspNetCore.Server.Kestrel.Transport.Sockets.SocketConnectionListener.Bind()
+   at Microsoft.AspNetCore.Server.Kestrel.Transport.Sockets.SocketTransportFactory.BindAsync(EndPoint endpoint, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.Infrastructure.TransportManager.BindAsync(EndPoint endPoint, ConnectionDelegate connectionDelegate, EndpointConfig endpointConfig, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServerImpl.<>c__DisplayClass28_0`1.<<StartAsync>g__OnBind|0>d.MoveNext()
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.AddressBinder.BindEndpointAsync(ListenOptions endpoint, AddressBindContext context, CancellationToken cancellationToken)
+   --- End of inner exception stack trace ---
+   at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.AddressBinder.BindEndpointAsync(ListenOptions endpoint, AddressBindContext context, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.LocalhostListenOptions.BindAsync(AddressBindContext context, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.AddressBinder.AddressesStrategy.BindAsync(AddressBindContext context, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.AddressBinder.BindAsync(ListenOptions[] listenOptions, AddressBindContext context, Func`2 useHttps, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServerImpl.BindAsync(CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServerImpl.StartAsync[TContext](IHttpApplication`1 application, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Hosting.GenericWebHostService.StartAsync(CancellationToken cancellationToken)
+   at Microsoft.Extensions.Hosting.Internal.Host.<StartAsync>b__15_1(IHostedService service, CancellationToken token)
+   at Microsoft.Extensions.Hosting.Internal.Host.ForeachService[T](IEnumerable`1 services, CancellationToken token, Boolean concurrent, Boolean abortOnFirstException, List`1 exceptions, Func`3 operation)
+2026-03-23 14:35:08.194 -03:00 [INF] Executed DbCommand (18ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-03-23 14:35:08.265 -03:00 [INF] Executed DbCommand (30ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+
+IF EXISTS
+    (SELECT *
+     FROM [sys].[objects] o
+     WHERE [o].[type] = 'U'
+     AND [o].[is_ms_shipped] = 0
+     AND NOT EXISTS (SELECT *
+         FROM [sys].[extended_properties] AS [ep]
+         WHERE [ep].[major_id] = [o].[object_id]
+             AND [ep].[minor_id] = 0
+             AND [ep].[class] = 1
+             AND [ep].[name] = N'microsoft_database_tools_support'
+    )
+)
+SELECT 1 ELSE SELECT 0
+2026-03-23 14:35:08.269 -03:00 [INF] Inclusive Communication Hub API starting...
+2026-03-23 14:35:08.277 -03:00 [INF] User profile is available. Using 'C:\Users\ASUS\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.
+2026-03-23 14:35:08.330 -03:00 [WRN] The ASP.NET Core developer certificate is not trusted. For information about trusting the ASP.NET Core developer certificate, see https://aka.ms/aspnet/https-trust-dev-cert.
+2026-03-23 14:35:08.366 -03:00 [ERR] Hosting failed to start
+System.IO.IOException: Failed to bind to address https://127.0.0.1:49940: address already in use.
+ ---> Microsoft.AspNetCore.Connections.AddressInUseException: Solo se permite un uso de cada dirección de socket (protocolo/dirección de red/puerto)
+ ---> System.Net.Sockets.SocketException (10048): Solo se permite un uso de cada dirección de socket (protocolo/dirección de red/puerto)
+   at System.Net.Sockets.Socket.UpdateStatusAfterSocketErrorAndThrowException(SocketError error, Boolean disconnectOnFailure, String callerName)
+   at System.Net.Sockets.Socket.DoBind(EndPoint endPointSnapshot, SocketAddress socketAddress)
+   at System.Net.Sockets.Socket.Bind(EndPoint localEP)
+   at Microsoft.AspNetCore.Server.Kestrel.Transport.Sockets.SocketTransportOptions.CreateDefaultBoundListenSocket(EndPoint endpoint)
+   at Microsoft.AspNetCore.Server.Kestrel.Transport.Sockets.SocketConnectionListener.Bind()
+   --- End of inner exception stack trace ---
+   at Microsoft.AspNetCore.Server.Kestrel.Transport.Sockets.SocketConnectionListener.Bind()
+   at Microsoft.AspNetCore.Server.Kestrel.Transport.Sockets.SocketTransportFactory.BindAsync(EndPoint endpoint, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.Infrastructure.TransportManager.BindAsync(EndPoint endPoint, ConnectionDelegate connectionDelegate, EndpointConfig endpointConfig, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServerImpl.<>c__DisplayClass28_0`1.<<StartAsync>g__OnBind|0>d.MoveNext()
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.AddressBinder.BindEndpointAsync(ListenOptions endpoint, AddressBindContext context, CancellationToken cancellationToken)
+   --- End of inner exception stack trace ---
+   at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.AddressBinder.BindEndpointAsync(ListenOptions endpoint, AddressBindContext context, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.LocalhostListenOptions.BindAsync(AddressBindContext context, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.AddressBinder.AddressesStrategy.BindAsync(AddressBindContext context, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.AddressBinder.BindAsync(ListenOptions[] listenOptions, AddressBindContext context, Func`2 useHttps, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServerImpl.BindAsync(CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServerImpl.StartAsync[TContext](IHttpApplication`1 application, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Hosting.GenericWebHostService.StartAsync(CancellationToken cancellationToken)
+   at Microsoft.Extensions.Hosting.Internal.Host.<StartAsync>b__15_1(IHostedService service, CancellationToken token)
+   at Microsoft.Extensions.Hosting.Internal.Host.ForeachService[T](IEnumerable`1 services, CancellationToken token, Boolean concurrent, Boolean abortOnFirstException, List`1 exceptions, Func`3 operation)
+2026-03-23 14:50:18.707 -03:00 [INF] Executed DbCommand (40ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-03-23 14:50:18.868 -03:00 [INF] Executed DbCommand (86ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+
+IF EXISTS
+    (SELECT *
+     FROM [sys].[objects] o
+     WHERE [o].[type] = 'U'
+     AND [o].[is_ms_shipped] = 0
+     AND NOT EXISTS (SELECT *
+         FROM [sys].[extended_properties] AS [ep]
+         WHERE [ep].[major_id] = [o].[object_id]
+             AND [ep].[minor_id] = 0
+             AND [ep].[class] = 1
+             AND [ep].[name] = N'microsoft_database_tools_support'
+    )
+)
+SELECT 1 ELSE SELECT 0
+2026-03-23 14:50:18.875 -03:00 [INF] Inclusive Communication Hub API starting...
+2026-03-23 14:50:18.890 -03:00 [INF] User profile is available. Using 'C:\Users\ASUS\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.
+2026-03-23 14:50:18.997 -03:00 [WRN] The ASP.NET Core developer certificate is not trusted. For information about trusting the ASP.NET Core developer certificate, see https://aka.ms/aspnet/https-trust-dev-cert.
+2026-03-23 14:50:19.084 -03:00 [ERR] Hosting failed to start
+System.IO.IOException: Failed to bind to address https://127.0.0.1:49940: address already in use.
+ ---> Microsoft.AspNetCore.Connections.AddressInUseException: Solo se permite un uso de cada dirección de socket (protocolo/dirección de red/puerto)
+ ---> System.Net.Sockets.SocketException (10048): Solo se permite un uso de cada dirección de socket (protocolo/dirección de red/puerto)
+   at System.Net.Sockets.Socket.UpdateStatusAfterSocketErrorAndThrowException(SocketError error, Boolean disconnectOnFailure, String callerName)
+   at System.Net.Sockets.Socket.DoBind(EndPoint endPointSnapshot, SocketAddress socketAddress)
+   at System.Net.Sockets.Socket.Bind(EndPoint localEP)
+   at Microsoft.AspNetCore.Server.Kestrel.Transport.Sockets.SocketTransportOptions.CreateDefaultBoundListenSocket(EndPoint endpoint)
+   at Microsoft.AspNetCore.Server.Kestrel.Transport.Sockets.SocketConnectionListener.Bind()
+   --- End of inner exception stack trace ---
+   at Microsoft.AspNetCore.Server.Kestrel.Transport.Sockets.SocketConnectionListener.Bind()
+   at Microsoft.AspNetCore.Server.Kestrel.Transport.Sockets.SocketTransportFactory.BindAsync(EndPoint endpoint, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.Infrastructure.TransportManager.BindAsync(EndPoint endPoint, ConnectionDelegate connectionDelegate, EndpointConfig endpointConfig, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServerImpl.<>c__DisplayClass28_0`1.<<StartAsync>g__OnBind|0>d.MoveNext()
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.AddressBinder.BindEndpointAsync(ListenOptions endpoint, AddressBindContext context, CancellationToken cancellationToken)
+   --- End of inner exception stack trace ---
+   at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.AddressBinder.BindEndpointAsync(ListenOptions endpoint, AddressBindContext context, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.LocalhostListenOptions.BindAsync(AddressBindContext context, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.AddressBinder.AddressesStrategy.BindAsync(AddressBindContext context, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.AddressBinder.BindAsync(ListenOptions[] listenOptions, AddressBindContext context, Func`2 useHttps, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServerImpl.BindAsync(CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServerImpl.StartAsync[TContext](IHttpApplication`1 application, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Hosting.GenericWebHostService.StartAsync(CancellationToken cancellationToken)
+   at Microsoft.Extensions.Hosting.Internal.Host.<StartAsync>b__15_1(IHostedService service, CancellationToken token)
+   at Microsoft.Extensions.Hosting.Internal.Host.ForeachService[T](IEnumerable`1 services, CancellationToken token, Boolean concurrent, Boolean abortOnFirstException, List`1 exceptions, Func`3 operation)
+2026-03-23 14:58:29.802 -03:00 [INF] Executed DbCommand (64ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-03-23 14:58:29.996 -03:00 [INF] Executed DbCommand (89ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+
+IF EXISTS
+    (SELECT *
+     FROM [sys].[objects] o
+     WHERE [o].[type] = 'U'
+     AND [o].[is_ms_shipped] = 0
+     AND NOT EXISTS (SELECT *
+         FROM [sys].[extended_properties] AS [ep]
+         WHERE [ep].[major_id] = [o].[object_id]
+             AND [ep].[minor_id] = 0
+             AND [ep].[class] = 1
+             AND [ep].[name] = N'microsoft_database_tools_support'
+    )
+)
+SELECT 1 ELSE SELECT 0
+2026-03-23 14:58:30.006 -03:00 [INF] Inclusive Communication Hub API starting...
+2026-03-23 14:58:30.022 -03:00 [INF] User profile is available. Using 'C:\Users\ASUS\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.
+2026-03-23 14:58:30.099 -03:00 [WRN] The ASP.NET Core developer certificate is not trusted. For information about trusting the ASP.NET Core developer certificate, see https://aka.ms/aspnet/https-trust-dev-cert.
+2026-03-23 14:58:30.143 -03:00 [INF] Now listening on: https://localhost:49940
+2026-03-23 14:58:30.144 -03:00 [INF] Now listening on: http://localhost:49941
+2026-03-23 14:58:30.148 -03:00 [INF] Application started. Press Ctrl+C to shut down.
+2026-03-23 14:58:30.149 -03:00 [INF] Hosting environment: Development
+2026-03-23 14:58:30.151 -03:00 [INF] Content root path: D:\FREELANCE\COMPETENCIAS\Innovation Challenge - 2026 March 2\src\ICH.API
+2026-03-23 14:58:31.875 -03:00 [INF] Request starting HTTP/2 POST https://localhost:49940/hub/audio/negotiate?negotiateVersion=1 - null 0
+2026-03-23 14:58:31.929 -03:00 [INF] Executing endpoint '/hub/audio/negotiate'
+2026-03-23 14:58:31.934 -03:00 [INF] Executed endpoint '/hub/audio/negotiate'
+2026-03-23 14:58:31.936 -03:00 [INF] Request finished HTTP/2 POST https://localhost:49940/hub/audio/negotiate?negotiateVersion=1 - 200 316 application/json 62.1621ms
+2026-03-23 14:58:31.972 -03:00 [INF] Request starting HTTP/2 POST https://localhost:49940/hub/audio/negotiate?negotiateVersion=1 - null 0
+2026-03-23 14:58:31.976 -03:00 [INF] Executing endpoint '/hub/audio/negotiate'
+2026-03-23 14:58:31.978 -03:00 [INF] Executed endpoint '/hub/audio/negotiate'
+2026-03-23 14:58:31.980 -03:00 [INF] Request finished HTTP/2 POST https://localhost:49940/hub/audio/negotiate?negotiateVersion=1 - 200 316 application/json 7.8036ms
+2026-03-23 14:58:31.984 -03:00 [INF] Request starting HTTP/2 GET https://localhost:49940/hub/audio?id=pmBZmoDrEIqWg1XILifVIw - null null
+2026-03-23 14:58:31.992 -03:00 [INF] Executing endpoint '/hub/audio'
+2026-03-23 14:58:32.029 -03:00 [INF] Request starting HTTP/2 POST https://localhost:49940/hub/audio?id=pmBZmoDrEIqWg1XILifVIw - null 32
+2026-03-23 14:58:32.033 -03:00 [INF] Executing endpoint '/hub/audio'
+2026-03-23 14:58:32.036 -03:00 [INF] Executed endpoint '/hub/audio'
+2026-03-23 14:58:32.037 -03:00 [INF] Request finished HTTP/2 POST https://localhost:49940/hub/audio?id=pmBZmoDrEIqWg1XILifVIw - 200 0 text/plain 7.9287ms
+2026-03-23 14:58:32.045 -03:00 [INF] Client connected: n90vDfBxKyIT8tn5ziSJoA
+2026-03-23 14:58:32.047 -03:00 [INF] Request starting HTTP/2 POST https://localhost:49940/hub/audio?id=pmBZmoDrEIqWg1XILifVIw - null 11
+2026-03-23 14:58:32.051 -03:00 [INF] Executing endpoint '/hub/audio'
+2026-03-23 14:58:32.053 -03:00 [INF] Executed endpoint '/hub/audio'
+2026-03-23 14:58:32.055 -03:00 [INF] Request finished HTTP/2 POST https://localhost:49940/hub/audio?id=pmBZmoDrEIqWg1XILifVIw - 200 0 text/plain 7.496ms
+2026-03-23 14:58:48.059 -03:00 [INF] Request starting HTTP/2 POST https://localhost:49940/hub/audio?id=pmBZmoDrEIqWg1XILifVIw - null 11
+2026-03-23 14:58:48.063 -03:00 [INF] Executing endpoint '/hub/audio'
+2026-03-23 14:58:48.064 -03:00 [INF] Executed endpoint '/hub/audio'
+2026-03-23 14:58:48.066 -03:00 [INF] Request finished HTTP/2 POST https://localhost:49940/hub/audio?id=pmBZmoDrEIqWg1XILifVIw - 200 0 text/plain 6.2141ms
+2026-03-23 14:59:03.065 -03:00 [INF] Request starting HTTP/2 POST https://localhost:49940/hub/audio?id=pmBZmoDrEIqWg1XILifVIw - null 11
+2026-03-23 14:59:03.068 -03:00 [INF] Executing endpoint '/hub/audio'
+2026-03-23 14:59:03.069 -03:00 [INF] Executed endpoint '/hub/audio'
+2026-03-23 14:59:03.071 -03:00 [INF] Request finished HTTP/2 POST https://localhost:49940/hub/audio?id=pmBZmoDrEIqWg1XILifVIw - 200 0 text/plain 5.8481ms
+2026-03-23 14:59:19.052 -03:00 [INF] Request starting HTTP/2 POST https://localhost:49940/hub/audio?id=pmBZmoDrEIqWg1XILifVIw - null 11
+2026-03-23 14:59:19.055 -03:00 [INF] Executing endpoint '/hub/audio'
+2026-03-23 14:59:19.056 -03:00 [INF] Executed endpoint '/hub/audio'
+2026-03-23 14:59:19.057 -03:00 [INF] Request finished HTTP/2 POST https://localhost:49940/hub/audio?id=pmBZmoDrEIqWg1XILifVIw - 200 0 text/plain 5.1712ms
+2026-03-23 14:59:34.054 -03:00 [INF] Request starting HTTP/2 POST https://localhost:49940/hub/audio?id=pmBZmoDrEIqWg1XILifVIw - null 11
+2026-03-23 14:59:34.058 -03:00 [INF] Executing endpoint '/hub/audio'
+2026-03-23 14:59:34.059 -03:00 [INF] Executed endpoint '/hub/audio'
+2026-03-23 14:59:34.060 -03:00 [INF] Request finished HTTP/2 POST https://localhost:49940/hub/audio?id=pmBZmoDrEIqWg1XILifVIw - 200 0 text/plain 5.3963ms
+2026-03-23 14:59:50.062 -03:00 [INF] Request starting HTTP/2 POST https://localhost:49940/hub/audio?id=pmBZmoDrEIqWg1XILifVIw - null 11
+2026-03-23 14:59:50.064 -03:00 [INF] Executing endpoint '/hub/audio'
+2026-03-23 14:59:50.066 -03:00 [INF] Executed endpoint '/hub/audio'
+2026-03-23 14:59:50.067 -03:00 [INF] Request finished HTTP/2 POST https://localhost:49940/hub/audio?id=pmBZmoDrEIqWg1XILifVIw - 200 0 text/plain 4.9358ms
+2026-03-23 15:00:05.062 -03:00 [INF] Request starting HTTP/2 POST https://localhost:49940/hub/audio?id=pmBZmoDrEIqWg1XILifVIw - null 11
+2026-03-23 15:00:05.065 -03:00 [INF] Executing endpoint '/hub/audio'
+2026-03-23 15:00:05.066 -03:00 [INF] Executed endpoint '/hub/audio'
+2026-03-23 15:00:05.067 -03:00 [INF] Request finished HTTP/2 POST https://localhost:49940/hub/audio?id=pmBZmoDrEIqWg1XILifVIw - 200 0 text/plain 5.2592ms
+2026-03-23 15:00:21.052 -03:00 [INF] Request starting HTTP/2 POST https://localhost:49940/hub/audio?id=pmBZmoDrEIqWg1XILifVIw - null 11
+2026-03-23 15:00:21.055 -03:00 [INF] Executing endpoint '/hub/audio'
+2026-03-23 15:00:21.056 -03:00 [INF] Executed endpoint '/hub/audio'
+2026-03-23 15:00:21.057 -03:00 [INF] Request finished HTTP/2 POST https://localhost:49940/hub/audio?id=pmBZmoDrEIqWg1XILifVIw - 200 0 text/plain 5.5629ms
+2026-03-23 15:00:21.831 -03:00 [INF] Client disconnected: n90vDfBxKyIT8tn5ziSJoA
+2026-03-23 15:05:03.432 -03:00 [INF] Executed DbCommand (27ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-03-23 15:05:03.593 -03:00 [INF] Executed DbCommand (97ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+
+IF EXISTS
+    (SELECT *
+     FROM [sys].[objects] o
+     WHERE [o].[type] = 'U'
+     AND [o].[is_ms_shipped] = 0
+     AND NOT EXISTS (SELECT *
+         FROM [sys].[extended_properties] AS [ep]
+         WHERE [ep].[major_id] = [o].[object_id]
+             AND [ep].[minor_id] = 0
+             AND [ep].[class] = 1
+             AND [ep].[name] = N'microsoft_database_tools_support'
+    )
+)
+SELECT 1 ELSE SELECT 0
+2026-03-23 15:05:03.602 -03:00 [INF] Inclusive Communication Hub API starting...
+2026-03-23 15:05:03.616 -03:00 [INF] User profile is available. Using 'C:\Users\ASUS\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.
+2026-03-23 15:05:03.688 -03:00 [WRN] The ASP.NET Core developer certificate is not trusted. For information about trusting the ASP.NET Core developer certificate, see https://aka.ms/aspnet/https-trust-dev-cert.
+2026-03-23 15:05:03.723 -03:00 [INF] Now listening on: https://localhost:49940
+2026-03-23 15:05:03.725 -03:00 [INF] Now listening on: http://localhost:49941
+2026-03-23 15:05:03.728 -03:00 [INF] Application started. Press Ctrl+C to shut down.
+2026-03-23 15:05:03.730 -03:00 [INF] Hosting environment: Development
+2026-03-23 15:05:03.731 -03:00 [INF] Content root path: D:\FREELANCE\COMPETENCIAS\Innovation Challenge - 2026 March 2\src\ICH.API
+2026-03-23 15:05:09.756 -03:00 [INF] Request starting HTTP/2 POST https://localhost:49940/hub/audio/negotiate?negotiateVersion=1 - null 0
+2026-03-23 15:05:09.813 -03:00 [INF] Executing endpoint '/hub/audio/negotiate'
+2026-03-23 15:05:09.818 -03:00 [INF] Executed endpoint '/hub/audio/negotiate'
+2026-03-23 15:05:09.821 -03:00 [INF] Request finished HTTP/2 POST https://localhost:49940/hub/audio/negotiate?negotiateVersion=1 - 200 316 application/json 66.4055ms
+2026-03-23 15:05:09.860 -03:00 [INF] Request starting HTTP/2 POST https://localhost:49940/hub/audio/negotiate?negotiateVersion=1 - null 0
+2026-03-23 15:05:09.866 -03:00 [INF] Executing endpoint '/hub/audio/negotiate'
+2026-03-23 15:05:09.867 -03:00 [INF] Executed endpoint '/hub/audio/negotiate'
+2026-03-23 15:05:09.869 -03:00 [INF] Request finished HTTP/2 POST https://localhost:49940/hub/audio/negotiate?negotiateVersion=1 - 200 316 application/json 8.4865ms
+2026-03-23 15:05:09.873 -03:00 [INF] Request starting HTTP/2 GET https://localhost:49940/hub/audio?id=PDICXIe-WHBT8xn6FFbSgg - null null
+2026-03-23 15:05:09.884 -03:00 [INF] Executing endpoint '/hub/audio'
+2026-03-23 15:05:09.926 -03:00 [INF] Request starting HTTP/2 POST https://localhost:49940/hub/audio?id=PDICXIe-WHBT8xn6FFbSgg - null 32
+2026-03-23 15:05:09.929 -03:00 [INF] Executing endpoint '/hub/audio'
+2026-03-23 15:05:09.932 -03:00 [INF] Executed endpoint '/hub/audio'
+2026-03-23 15:05:09.934 -03:00 [INF] Request finished HTTP/2 POST https://localhost:49940/hub/audio?id=PDICXIe-WHBT8xn6FFbSgg - 200 0 text/plain 7.5749ms
+2026-03-23 15:05:09.939 -03:00 [INF] Client connected: F5U-6hbR056GW8LIitAUvw
+2026-03-23 15:05:09.942 -03:00 [INF] Request starting HTTP/2 POST https://localhost:49940/hub/audio?id=PDICXIe-WHBT8xn6FFbSgg - null 11
+2026-03-23 15:05:09.947 -03:00 [INF] Executing endpoint '/hub/audio'
+2026-03-23 15:05:09.949 -03:00 [INF] Executed endpoint '/hub/audio'
+2026-03-23 15:05:09.950 -03:00 [INF] Request finished HTTP/2 POST https://localhost:49940/hub/audio?id=PDICXIe-WHBT8xn6FFbSgg - 200 0 text/plain 8.3585ms
+2026-03-23 15:05:24.959 -03:00 [INF] Request starting HTTP/2 POST https://localhost:49940/hub/audio?id=PDICXIe-WHBT8xn6FFbSgg - null 11
+2026-03-23 15:05:24.963 -03:00 [INF] Executing endpoint '/hub/audio'
+2026-03-23 15:05:24.964 -03:00 [INF] Executed endpoint '/hub/audio'
+2026-03-23 15:05:24.966 -03:00 [INF] Request finished HTTP/2 POST https://localhost:49940/hub/audio?id=PDICXIe-WHBT8xn6FFbSgg - 200 0 text/plain 6.6233ms
+2026-03-23 15:05:39.960 -03:00 [INF] Request starting HTTP/2 POST https://localhost:49940/hub/audio?id=PDICXIe-WHBT8xn6FFbSgg - null 11
+2026-03-23 15:05:39.964 -03:00 [INF] Executing endpoint '/hub/audio'
+2026-03-23 15:05:39.966 -03:00 [INF] Executed endpoint '/hub/audio'
+2026-03-23 15:05:39.967 -03:00 [INF] Request finished HTTP/2 POST https://localhost:49940/hub/audio?id=PDICXIe-WHBT8xn6FFbSgg - 200 0 text/plain 7.2528ms
+2026-03-23 15:05:45.771 -03:00 [INF] Request starting HTTP/2 GET https://localhost:49940/hub/audio - null null
+2026-03-23 15:05:45.774 -03:00 [INF] Executing endpoint '/hub/audio'
+2026-03-23 15:05:45.786 -03:00 [INF] Executed endpoint '/hub/audio'
+2026-03-23 15:05:45.787 -03:00 [INF] Request finished HTTP/2 GET https://localhost:49940/hub/audio - 400 null text/plain 16.6879ms
+2026-03-23 15:05:46.043 -03:00 [INF] Request starting HTTP/2 GET https://localhost:49940/favicon.ico - null null
+2026-03-23 15:05:46.047 -03:00 [INF] Request finished HTTP/2 GET https://localhost:49940/favicon.ico - 404 0 null 3.3836ms
+2026-03-23 15:05:46.050 -03:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET https://localhost:49940/favicon.ico, Response status code: 404
+2026-03-23 15:05:55.951 -03:00 [INF] Request starting HTTP/2 POST https://localhost:49940/hub/audio?id=PDICXIe-WHBT8xn6FFbSgg - null 11
+2026-03-23 15:05:55.954 -03:00 [INF] Executing endpoint '/hub/audio'
+2026-03-23 15:05:55.956 -03:00 [INF] Executed endpoint '/hub/audio'
+2026-03-23 15:05:55.957 -03:00 [INF] Request finished HTTP/2 POST https://localhost:49940/hub/audio?id=PDICXIe-WHBT8xn6FFbSgg - 200 0 text/plain 6.0739ms
+2026-03-23 15:06:10.960 -03:00 [INF] Request starting HTTP/2 POST https://localhost:49940/hub/audio?id=PDICXIe-WHBT8xn6FFbSgg - null 11
+2026-03-23 15:06:10.963 -03:00 [INF] Executing endpoint '/hub/audio'
+2026-03-23 15:06:10.964 -03:00 [INF] Executed endpoint '/hub/audio'
+2026-03-23 15:06:10.966 -03:00 [INF] Request finished HTTP/2 POST https://localhost:49940/hub/audio?id=PDICXIe-WHBT8xn6FFbSgg - 200 0 text/plain 6.6198ms
+2026-03-23 15:06:12.329 -03:00 [INF] Client disconnected: F5U-6hbR056GW8LIitAUvw
+2026-03-23 15:14:03.390 -03:00 [INF] Executed DbCommand (35ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-03-23 15:14:03.529 -03:00 [INF] Executed DbCommand (69ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+
+IF EXISTS
+    (SELECT *
+     FROM [sys].[objects] o
+     WHERE [o].[type] = 'U'
+     AND [o].[is_ms_shipped] = 0
+     AND NOT EXISTS (SELECT *
+         FROM [sys].[extended_properties] AS [ep]
+         WHERE [ep].[major_id] = [o].[object_id]
+             AND [ep].[minor_id] = 0
+             AND [ep].[class] = 1
+             AND [ep].[name] = N'microsoft_database_tools_support'
+    )
+)
+SELECT 1 ELSE SELECT 0
+2026-03-23 15:14:03.537 -03:00 [INF] Inclusive Communication Hub API starting...
+2026-03-23 15:14:03.549 -03:00 [INF] User profile is available. Using 'C:\Users\ASUS\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.
+2026-03-23 15:14:03.635 -03:00 [WRN] The ASP.NET Core developer certificate is not trusted. For information about trusting the ASP.NET Core developer certificate, see https://aka.ms/aspnet/https-trust-dev-cert.
+2026-03-23 15:14:03.686 -03:00 [INF] Now listening on: https://localhost:49940
+2026-03-23 15:14:03.688 -03:00 [INF] Now listening on: http://localhost:49941
+2026-03-23 15:14:03.692 -03:00 [INF] Application started. Press Ctrl+C to shut down.
+2026-03-23 15:14:03.695 -03:00 [INF] Hosting environment: Development
+2026-03-23 15:14:03.697 -03:00 [INF] Content root path: D:\FREELANCE\COMPETENCIAS\Innovation Challenge - 2026 March 2\src\ICH.API
+2026-03-23 15:14:10.902 -03:00 [INF] Request starting HTTP/2 POST https://localhost:49940/hub/audio/negotiate?negotiateVersion=1 - null 0
+2026-03-23 15:14:10.980 -03:00 [INF] Executing endpoint '/hub/audio/negotiate'
+2026-03-23 15:14:10.988 -03:00 [INF] Executed endpoint '/hub/audio/negotiate'
+2026-03-23 15:14:10.992 -03:00 [INF] Request finished HTTP/2 POST https://localhost:49940/hub/audio/negotiate?negotiateVersion=1 - 200 316 application/json 91.1892ms
+2026-03-23 15:14:11.055 -03:00 [INF] Request starting HTTP/2 POST https://localhost:49940/hub/audio/negotiate?negotiateVersion=1 - null 0
+2026-03-23 15:14:11.066 -03:00 [INF] Executing endpoint '/hub/audio/negotiate'
+2026-03-23 15:14:11.070 -03:00 [INF] Executed endpoint '/hub/audio/negotiate'
+2026-03-23 15:14:11.073 -03:00 [INF] Request finished HTTP/2 POST https://localhost:49940/hub/audio/negotiate?negotiateVersion=1 - 200 316 application/json 18.1331ms
+2026-03-23 15:14:11.081 -03:00 [INF] Request starting HTTP/2 GET https://localhost:49940/hub/audio?id=-xZG762w1wCry0tmVsJ7Gg - null null
+2026-03-23 15:14:11.099 -03:00 [INF] Executing endpoint '/hub/audio'
+2026-03-23 15:14:11.167 -03:00 [INF] Request starting HTTP/2 POST https://localhost:49940/hub/audio?id=-xZG762w1wCry0tmVsJ7Gg - null 32
+2026-03-23 15:14:11.174 -03:00 [INF] Executing endpoint '/hub/audio'
+2026-03-23 15:14:11.180 -03:00 [INF] Executed endpoint '/hub/audio'
+2026-03-23 15:14:11.183 -03:00 [INF] Request finished HTTP/2 POST https://localhost:49940/hub/audio?id=-xZG762w1wCry0tmVsJ7Gg - 200 0 text/plain 15.728ms
+2026-03-23 15:14:11.192 -03:00 [INF] Client connected: bDu04RPj1wbSIME9rBMSfQ
+2026-03-23 15:14:11.195 -03:00 [INF] Request starting HTTP/2 POST https://localhost:49940/hub/audio?id=-xZG762w1wCry0tmVsJ7Gg - null 11
+2026-03-23 15:14:11.201 -03:00 [INF] Executing endpoint '/hub/audio'
+2026-03-23 15:14:11.204 -03:00 [INF] Executed endpoint '/hub/audio'
+2026-03-23 15:14:11.207 -03:00 [INF] Request finished HTTP/2 POST https://localhost:49940/hub/audio?id=-xZG762w1wCry0tmVsJ7Gg - 200 0 text/plain 12.1488ms
+2026-03-23 15:14:26.208 -03:00 [INF] Request starting HTTP/2 POST https://localhost:49940/hub/audio?id=-xZG762w1wCry0tmVsJ7Gg - null 11
+2026-03-23 15:14:26.212 -03:00 [INF] Executing endpoint '/hub/audio'
+2026-03-23 15:14:26.214 -03:00 [INF] Executed endpoint '/hub/audio'
+2026-03-23 15:14:26.215 -03:00 [INF] Request finished HTTP/2 POST https://localhost:49940/hub/audio?id=-xZG762w1wCry0tmVsJ7Gg - 200 0 text/plain 7.1025ms
+2026-03-23 15:14:42.201 -03:00 [INF] Request starting HTTP/2 POST https://localhost:49940/hub/audio?id=-xZG762w1wCry0tmVsJ7Gg - null 11
+2026-03-23 15:14:42.204 -03:00 [INF] Executing endpoint '/hub/audio'
+2026-03-23 15:14:42.206 -03:00 [INF] Executed endpoint '/hub/audio'
+2026-03-23 15:14:42.207 -03:00 [INF] Request finished HTTP/2 POST https://localhost:49940/hub/audio?id=-xZG762w1wCry0tmVsJ7Gg - 200 0 text/plain 5.3108ms
+2026-03-23 15:14:57.206 -03:00 [INF] Request starting HTTP/2 POST https://localhost:49940/hub/audio?id=-xZG762w1wCry0tmVsJ7Gg - null 11
+2026-03-23 15:14:57.208 -03:00 [INF] Executing endpoint '/hub/audio'
+2026-03-23 15:14:57.210 -03:00 [INF] Executed endpoint '/hub/audio'
+2026-03-23 15:14:57.211 -03:00 [INF] Request finished HTTP/2 POST https://localhost:49940/hub/audio?id=-xZG762w1wCry0tmVsJ7Gg - 200 0 text/plain 5.2769ms
+2026-03-23 15:15:12.212 -03:00 [INF] Request starting HTTP/2 POST https://localhost:49940/hub/audio?id=-xZG762w1wCry0tmVsJ7Gg - null 11
+2026-03-23 15:15:12.215 -03:00 [INF] Executing endpoint '/hub/audio'
+2026-03-23 15:15:12.216 -03:00 [INF] Executed endpoint '/hub/audio'
+2026-03-23 15:15:12.217 -03:00 [INF] Request finished HTTP/2 POST https://localhost:49940/hub/audio?id=-xZG762w1wCry0tmVsJ7Gg - 200 0 text/plain 4.8067ms
+2026-03-23 15:15:27.213 -03:00 [INF] Request starting HTTP/2 POST https://localhost:49940/hub/audio?id=-xZG762w1wCry0tmVsJ7Gg - null 11
+2026-03-23 15:15:27.216 -03:00 [INF] Executing endpoint '/hub/audio'
+2026-03-23 15:15:27.217 -03:00 [INF] Executed endpoint '/hub/audio'
+2026-03-23 15:15:27.218 -03:00 [INF] Request finished HTTP/2 POST https://localhost:49940/hub/audio?id=-xZG762w1wCry0tmVsJ7Gg - 200 0 text/plain 5.4749ms
+2026-03-23 15:15:43.213 -03:00 [INF] Request starting HTTP/2 POST https://localhost:49940/hub/audio?id=-xZG762w1wCry0tmVsJ7Gg - null 11
+2026-03-23 15:15:43.216 -03:00 [INF] Executing endpoint '/hub/audio'
+2026-03-23 15:15:43.217 -03:00 [INF] Executed endpoint '/hub/audio'
+2026-03-23 15:15:43.218 -03:00 [INF] Request finished HTTP/2 POST https://localhost:49940/hub/audio?id=-xZG762w1wCry0tmVsJ7Gg - 200 0 text/plain 5.6923ms
+2026-03-23 15:15:59.202 -03:00 [INF] Request starting HTTP/2 POST https://localhost:49940/hub/audio?id=-xZG762w1wCry0tmVsJ7Gg - null 11
+2026-03-23 15:15:59.204 -03:00 [INF] Executing endpoint '/hub/audio'
+2026-03-23 15:15:59.206 -03:00 [INF] Executed endpoint '/hub/audio'
+2026-03-23 15:15:59.207 -03:00 [INF] Request finished HTTP/2 POST https://localhost:49940/hub/audio?id=-xZG762w1wCry0tmVsJ7Gg - 200 0 text/plain 5.3081ms
+2026-03-23 15:16:14.211 -03:00 [INF] Request starting HTTP/2 POST https://localhost:49940/hub/audio?id=-xZG762w1wCry0tmVsJ7Gg - null 11
+2026-03-23 15:16:14.214 -03:00 [INF] Executing endpoint '/hub/audio'
+2026-03-23 15:16:14.216 -03:00 [INF] Executed endpoint '/hub/audio'
+2026-03-23 15:16:14.217 -03:00 [INF] Request finished HTTP/2 POST https://localhost:49940/hub/audio?id=-xZG762w1wCry0tmVsJ7Gg - 200 0 text/plain 5.7614ms
+2026-03-23 15:16:30.213 -03:00 [INF] Request starting HTTP/2 POST https://localhost:49940/hub/audio?id=-xZG762w1wCry0tmVsJ7Gg - null 11
+2026-03-23 15:16:30.217 -03:00 [INF] Executing endpoint '/hub/audio'
+2026-03-23 15:16:30.218 -03:00 [INF] Executed endpoint '/hub/audio'
+2026-03-23 15:16:30.221 -03:00 [INF] Request finished HTTP/2 POST https://localhost:49940/hub/audio?id=-xZG762w1wCry0tmVsJ7Gg - 200 0 text/plain 7.6051ms
+2026-03-23 15:16:46.212 -03:00 [INF] Request starting HTTP/2 POST https://localhost:49940/hub/audio?id=-xZG762w1wCry0tmVsJ7Gg - null 11
+2026-03-23 15:16:46.215 -03:00 [INF] Executing endpoint '/hub/audio'
+2026-03-23 15:16:46.216 -03:00 [INF] Executed endpoint '/hub/audio'
+2026-03-23 15:16:46.217 -03:00 [INF] Request finished HTTP/2 POST https://localhost:49940/hub/audio?id=-xZG762w1wCry0tmVsJ7Gg - 200 0 text/plain 5.1309ms
+2026-03-23 15:25:07.925 -03:00 [INF] Executed DbCommand (36ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2026-03-23 15:25:08.084 -03:00 [INF] Executed DbCommand (83ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+
+IF EXISTS
+    (SELECT *
+     FROM [sys].[objects] o
+     WHERE [o].[type] = 'U'
+     AND [o].[is_ms_shipped] = 0
+     AND NOT EXISTS (SELECT *
+         FROM [sys].[extended_properties] AS [ep]
+         WHERE [ep].[major_id] = [o].[object_id]
+             AND [ep].[minor_id] = 0
+             AND [ep].[class] = 1
+             AND [ep].[name] = N'microsoft_database_tools_support'
+    )
+)
+SELECT 1 ELSE SELECT 0
+2026-03-23 15:25:08.094 -03:00 [INF] Inclusive Communication Hub API starting...
+2026-03-23 15:25:08.110 -03:00 [INF] User profile is available. Using 'C:\Users\ASUS\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.
+2026-03-23 15:25:08.197 -03:00 [WRN] The ASP.NET Core developer certificate is not trusted. For information about trusting the ASP.NET Core developer certificate, see https://aka.ms/aspnet/https-trust-dev-cert.
+2026-03-23 15:25:08.252 -03:00 [INF] Now listening on: https://localhost:49940
+2026-03-23 15:25:08.254 -03:00 [INF] Now listening on: http://localhost:49941
+2026-03-23 15:25:08.258 -03:00 [INF] Application started. Press Ctrl+C to shut down.
+2026-03-23 15:25:08.259 -03:00 [INF] Hosting environment: Development
+2026-03-23 15:25:08.261 -03:00 [INF] Content root path: D:\FREELANCE\COMPETENCIAS\Innovation Challenge - 2026 March 2\src\ICH.API
+2026-03-23 15:25:12.554 -03:00 [INF] Request starting HTTP/2 POST https://localhost:49940/hub/audio/negotiate?negotiateVersion=1 - null 0
+2026-03-23 15:25:12.628 -03:00 [INF] Executing endpoint '/hub/audio/negotiate'
+2026-03-23 15:25:12.635 -03:00 [INF] Executed endpoint '/hub/audio/negotiate'
+2026-03-23 15:25:12.638 -03:00 [INF] Request finished HTTP/2 POST https://localhost:49940/hub/audio/negotiate?negotiateVersion=1 - 200 316 application/json 85.6768ms
+2026-03-23 15:25:12.686 -03:00 [INF] Request starting HTTP/2 POST https://localhost:49940/hub/audio/negotiate?negotiateVersion=1 - null 0
+2026-03-23 15:25:12.693 -03:00 [INF] Executing endpoint '/hub/audio/negotiate'
+2026-03-23 15:25:12.695 -03:00 [INF] Executed endpoint '/hub/audio/negotiate'
+2026-03-23 15:25:12.697 -03:00 [INF] Request finished HTTP/2 POST https://localhost:49940/hub/audio/negotiate?negotiateVersion=1 - 200 316 application/json 11.1722ms
+2026-03-23 15:25:12.701 -03:00 [INF] Request starting HTTP/2 GET https://localhost:49940/hub/audio?id=DMdByP7yf2K_Z-1WljBZnA - null null
+2026-03-23 15:25:12.712 -03:00 [INF] Executing endpoint '/hub/audio'
+2026-03-23 15:25:12.753 -03:00 [INF] Request starting HTTP/2 POST https://localhost:49940/hub/audio?id=DMdByP7yf2K_Z-1WljBZnA - null 32
+2026-03-23 15:25:12.758 -03:00 [INF] Executing endpoint '/hub/audio'
+2026-03-23 15:25:12.762 -03:00 [INF] Executed endpoint '/hub/audio'
+2026-03-23 15:25:12.764 -03:00 [INF] Request finished HTTP/2 POST https://localhost:49940/hub/audio?id=DMdByP7yf2K_Z-1WljBZnA - 200 0 text/plain 11.386ms
+2026-03-23 15:25:12.770 -03:00 [INF] Client connected: zEaMEHhZgVmCbTTUvAgANg
+2026-03-23 15:25:12.773 -03:00 [INF] Request starting HTTP/2 POST https://localhost:49940/hub/audio?id=DMdByP7yf2K_Z-1WljBZnA - null 11
+2026-03-23 15:25:12.779 -03:00 [INF] Executing endpoint '/hub/audio'
+2026-03-23 15:25:12.782 -03:00 [INF] Executed endpoint '/hub/audio'
+2026-03-23 15:25:12.785 -03:00 [INF] Request finished HTTP/2 POST https://localhost:49940/hub/audio?id=DMdByP7yf2K_Z-1WljBZnA - 200 0 text/plain 12.2899ms
+2026-03-23 15:25:27.787 -03:00 [INF] Request starting HTTP/2 POST https://localhost:49940/hub/audio?id=DMdByP7yf2K_Z-1WljBZnA - null 11
+2026-03-23 15:25:27.790 -03:00 [INF] Executing endpoint '/hub/audio'
+2026-03-23 15:25:27.792 -03:00 [INF] Executed endpoint '/hub/audio'
+2026-03-23 15:25:27.793 -03:00 [INF] Request finished HTTP/2 POST https://localhost:49940/hub/audio?id=DMdByP7yf2K_Z-1WljBZnA - 200 0 text/plain 5.3003ms

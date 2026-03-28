@@ -1,0 +1,17 @@
+D:\FREELANCE\COMPETENCIAS\Innovation Challenge - 2026 March 2\src\ICH.Application\bin\Debug\net8.0-windows\ICH.Application.deps.json
+D:\FREELANCE\COMPETENCIAS\Innovation Challenge - 2026 March 2\src\ICH.Application\bin\Debug\net8.0-windows\ICH.Application.dll
+D:\FREELANCE\COMPETENCIAS\Innovation Challenge - 2026 March 2\src\ICH.Application\bin\Debug\net8.0-windows\ICH.Application.pdb
+D:\FREELANCE\COMPETENCIAS\Innovation Challenge - 2026 March 2\src\ICH.Application\bin\Debug\net8.0-windows\ICH.Domain.dll
+D:\FREELANCE\COMPETENCIAS\Innovation Challenge - 2026 March 2\src\ICH.Application\bin\Debug\net8.0-windows\ICH.Shared.dll
+D:\FREELANCE\COMPETENCIAS\Innovation Challenge - 2026 March 2\src\ICH.Application\bin\Debug\net8.0-windows\ICH.Domain.pdb
+D:\FREELANCE\COMPETENCIAS\Innovation Challenge - 2026 March 2\src\ICH.Application\bin\Debug\net8.0-windows\ICH.Shared.pdb
+D:\FREELANCE\COMPETENCIAS\Innovation Challenge - 2026 March 2\src\ICH.Application\obj\Debug\net8.0-windows\ICH.Application.csproj.AssemblyReference.cache
+D:\FREELANCE\COMPETENCIAS\Innovation Challenge - 2026 March 2\src\ICH.Application\obj\Debug\net8.0-windows\ICH.Application.GeneratedMSBuildEditorConfig.editorconfig
+D:\FREELANCE\COMPETENCIAS\Innovation Challenge - 2026 March 2\src\ICH.Application\obj\Debug\net8.0-windows\ICH.Application.AssemblyInfoInputs.cache
+D:\FREELANCE\COMPETENCIAS\Innovation Challenge - 2026 March 2\src\ICH.Application\obj\Debug\net8.0-windows\ICH.Application.AssemblyInfo.cs
+D:\FREELANCE\COMPETENCIAS\Innovation Challenge - 2026 March 2\src\ICH.Application\obj\Debug\net8.0-windows\ICH.Application.csproj.CoreCompileInputs.cache
+D:\FREELANCE\COMPETENCIAS\Innovation Challenge - 2026 March 2\src\ICH.Application\obj\Debug\net8.0-windows\ICH.Appl.B174AB91.Up2Date
+D:\FREELANCE\COMPETENCIAS\Innovation Challenge - 2026 March 2\src\ICH.Application\obj\Debug\net8.0-windows\ICH.Application.dll
+D:\FREELANCE\COMPETENCIAS\Innovation Challenge - 2026 March 2\src\ICH.Application\obj\Debug\net8.0-windows\refint\ICH.Application.dll
+D:\FREELANCE\COMPETENCIAS\Innovation Challenge - 2026 March 2\src\ICH.Application\obj\Debug\net8.0-windows\ICH.Application.pdb
+D:\FREELANCE\COMPETENCIAS\Innovation Challenge - 2026 March 2\src\ICH.Application\obj\Debug\net8.0-windows\ref\ICH.Application.dll

@@ -1,0 +1,570 @@
+sw.js:19 [Service Worker] Precaching critical dashboard assets
+sw.js:21 [Service Worker] Precache soft-failure: TypeError: Failed to execute 'addAll' on 'Cache': Request failed
+(anónimo) @ sw.js:21
+Promise.catch
+(anónimo) @ sw.js:21
+sw.js:65 [Service Worker] Network request failed and asset is not cached: https://localhost:49938/#
+(anónimo) @ sw.js:65
+Promise.catch
+(anónimo) @ sw.js:63
+Promise.then
+(anónimo) @ sw.js:49
+The FetchEvent for "<URL>" resulted in a network error response: the promise was rejected.
+The FetchEvent for "<URL>" resulted in a network error response: the promise was rejected.
+The FetchEvent for "<URL>" resulted in a network error response: the promise was rejected.
+The FetchEvent for "<URL>" resulted in a network error response: the promise was rejected.
+The FetchEvent for "<URL>" resulted in a network error response: the promise was rejected.
+The FetchEvent for "<URL>" resulted in a network error response: the promise was rejected.
+The FetchEvent for "<URL>" resulted in a network error response: the promise was rejected.
+The FetchEvent for "<URL>" resulted in a network error response: the promise was rejected.
+The FetchEvent for "<URL>" resulted in a network error response: the promise was rejected.
+The FetchEvent for "<URL>" resulted in a network error response: the promise was rejected.
+The FetchEvent for "<URL>" resulted in a network error response: the promise was rejected.
+The FetchEvent for "<URL>" resulted in a network error response: the promise was rejected.
+The FetchEvent for "<URL>" resulted in a network error response: the promise was rejected.
+The FetchEvent for "<URL>" resulted in a network error response: the promise was rejected.
+The FetchEvent for "<URL>" resulted in a network error response: the promise was rejected.
+The FetchEvent for "<URL>" resulted in a network error response: the promise was rejected.
+The FetchEvent for "<URL>" resulted in a network error response: the promise was rejected.
+The FetchEvent for "<URL>" resulted in a network error response: the promise was rejected.
+The FetchEvent for "<URL>" resulted in a network error response: the promise was rejected.
+The FetchEvent for "<URL>" resulted in a network error response: the promise was rejected.
+The FetchEvent for "<URL>" resulted in a network error response: the promise was rejected.
+The FetchEvent for "<URL>" resulted in a network error response: the promise was rejected.
+The FetchEvent for "<URL>" resulted in a network error response: the promise was rejected.
+The FetchEvent for "<URL>" resulted in a network error response: the promise was rejected.
+The FetchEvent for "<URL>" resulted in a network error response: the promise was rejected.
+The FetchEvent for "<URL>" resulted in a network error response: the promise was rejected.
+The FetchEvent for "<URL>" resulted in a network error response: the promise was rejected.
+The FetchEvent for "<URL>" resulted in a network error response: the promise was rejected.
+The FetchEvent for "<URL>" resulted in a network error response: the promise was rejected.
+The FetchEvent for "<URL>" resulted in a network error response: the promise was rejected.
+The FetchEvent for "<URL>" resulted in a network error response: the promise was rejected.
+The FetchEvent for "<URL>" resulted in a network error response: the promise was rejected.
+The FetchEvent for "<URL>" resulted in a network error response: the promise was rejected.
+The FetchEvent for "<URL>" resulted in a network error response: the promise was rejected.
+The FetchEvent for "<URL>" resulted in a network error response: the promise was rejected.
+The FetchEvent for "<URL>" resulted in a network error response: the promise was rejected.
+The FetchEvent for "<URL>" resulted in a network error response: the promise was rejected.
+The FetchEvent for "<URL>" resulted in a network error response: the promise was rejected.
+The FetchEvent for "<URL>" resulted in a network error response: the promise was rejected.
+The FetchEvent for "<URL>" resulted in a network error response: the promise was rejected.
+The FetchEvent for "<URL>" resulted in a network error response: the promise was rejected.
+The FetchEvent for "<URL>" resulted in a network error response: the promise was rejected.
+The FetchEvent for "<URL>" resulted in a network error response: the promise was rejected.
+The FetchEvent for "<URL>" resulted in a network error response: the promise was rejected.
+The FetchEvent for "<URL>" resulted in a network error response: the promise was rejected.
+The FetchEvent for "<URL>" resulted in a network error response: the promise was rejected.
+The FetchEvent for "<URL>" resulted in a network error response: the promise was rejected.
+The FetchEvent for "<URL>" resulted in a network error response: the promise was rejected.
+The FetchEvent for "<URL>" resulted in a network error response: the promise was rejected.
+The FetchEvent for "<URL>" resulted in a network error response: the promise was rejected.
+The FetchEvent for "<URL>" resulted in a network error response: the promise was rejected.
+The FetchEvent for "<URL>" resulted in a network error response: the promise was rejected.
+The FetchEvent for "<URL>" resulted in a network error response: the promise was rejected.
+The FetchEvent for "<URL>" resulted in a network error response: the promise was rejected.
+The FetchEvent for "<URL>" resulted in a network error response: the promise was rejected.
+The FetchEvent for "<URL>" resulted in a network error response: the promise was rejected.
+The FetchEvent for "<URL>" resulted in a network error response: the promise was rejected.
+The FetchEvent for "<URL>" resulted in a network error response: the promise was rejected.
+The FetchEvent for "<URL>" resulted in a network error response: the promise was rejected.
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:65 [Service Worker] Network request failed and asset is not cached: https://localhost:49938/#
+(anónimo) @ sw.js:65
+Promise.catch
+(anónimo) @ sw.js:63
+Promise.then
+(anónimo) @ sw.js:49
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:65 [Service Worker] Network request failed and asset is not cached: https://localhost:49938/#
+(anónimo) @ sw.js:65
+Promise.catch
+(anónimo) @ sw.js:63
+Promise.then
+(anónimo) @ sw.js:49
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:65 [Service Worker] Network request failed and asset is not cached: https://localhost:49938/#
+(anónimo) @ sw.js:65
+Promise.catch
+(anónimo) @ sw.js:63
+Promise.then
+(anónimo) @ sw.js:49
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:65 [Service Worker] Network request failed and asset is not cached: https://localhost:49938/#
+(anónimo) @ sw.js:65
+Promise.catch
+(anónimo) @ sw.js:63
+Promise.then
+(anónimo) @ sw.js:49
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:65 [Service Worker] Network request failed and asset is not cached: https://localhost:49938/#
+(anónimo) @ sw.js:65
+Promise.catch
+(anónimo) @ sw.js:63
+Promise.then
+(anónimo) @ sw.js:49
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:65 [Service Worker] Network request failed and asset is not cached: https://localhost:49938/#
+(anónimo) @ sw.js:65
+Promise.catch
+(anónimo) @ sw.js:63
+Promise.then
+(anónimo) @ sw.js:49
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:65 [Service Worker] Network request failed and asset is not cached: https://localhost:49938/#
+(anónimo) @ sw.js:65
+Promise.catch
+(anónimo) @ sw.js:63
+Promise.then
+(anónimo) @ sw.js:49
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:65 [Service Worker] Network request failed and asset is not cached: https://localhost:49938/#
+(anónimo) @ sw.js:65
+Promise.catch
+(anónimo) @ sw.js:63
+Promise.then
+(anónimo) @ sw.js:49
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:65 [Service Worker] Network request failed and asset is not cached: https://localhost:49938/#
+(anónimo) @ sw.js:65
+Promise.catch
+(anónimo) @ sw.js:63
+Promise.then
+(anónimo) @ sw.js:49
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:65 [Service Worker] Network request failed and asset is not cached: https://localhost:49938/#
+(anónimo) @ sw.js:65
+Promise.catch
+(anónimo) @ sw.js:63
+Promise.then
+(anónimo) @ sw.js:49
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:65 [Service Worker] Network request failed and asset is not cached: https://localhost:49938/#
+(anónimo) @ sw.js:65
+Promise.catch
+(anónimo) @ sw.js:63
+Promise.then
+(anónimo) @ sw.js:49
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:65 [Service Worker] Network request failed and asset is not cached: https://localhost:49938/#
+(anónimo) @ sw.js:65
+Promise.catch
+(anónimo) @ sw.js:63
+Promise.then
+(anónimo) @ sw.js:49
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:65 [Service Worker] Network request failed and asset is not cached: https://localhost:49938/#
+(anónimo) @ sw.js:65
+Promise.catch
+(anónimo) @ sw.js:63
+Promise.then
+(anónimo) @ sw.js:49
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:65 [Service Worker] Network request failed and asset is not cached: https://localhost:49938/#
+(anónimo) @ sw.js:65
+Promise.catch
+(anónimo) @ sw.js:63
+Promise.then
+(anónimo) @ sw.js:49
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:65 [Service Worker] Network request failed and asset is not cached: https://localhost:49938/#
+(anónimo) @ sw.js:65
+Promise.catch
+(anónimo) @ sw.js:63
+Promise.then
+(anónimo) @ sw.js:49
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:65 [Service Worker] Network request failed and asset is not cached: https://localhost:49938/#
+(anónimo) @ sw.js:65
+Promise.catch
+(anónimo) @ sw.js:63
+Promise.then
+(anónimo) @ sw.js:49
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:65 [Service Worker] Network request failed and asset is not cached: http://localhost:4200/
+(anónimo) @ sw.js:65
+Promise.catch
+(anónimo) @ sw.js:63
+Promise.then
+(anónimo) @ sw.js:49
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:65 [Service Worker] Network request failed and asset is not cached: http://localhost:4200/
+(anónimo) @ sw.js:65
+Promise.catch
+(anónimo) @ sw.js:63
+Promise.then
+(anónimo) @ sw.js:49
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:65 [Service Worker] Network request failed and asset is not cached: http://localhost:4200/
+(anónimo) @ sw.js:65
+Promise.catch
+(anónimo) @ sw.js:63
+Promise.then
+(anónimo) @ sw.js:49
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:65 [Service Worker] Network request failed and asset is not cached: http://localhost:4200/
+(anónimo) @ sw.js:65
+Promise.catch
+(anónimo) @ sw.js:63
+Promise.then
+(anónimo) @ sw.js:49
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:65 [Service Worker] Network request failed and asset is not cached: http://localhost:4200/
+(anónimo) @ sw.js:65
+Promise.catch
+(anónimo) @ sw.js:63
+Promise.then
+(anónimo) @ sw.js:49
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:65 [Service Worker] Network request failed and asset is not cached: http://localhost:4200/
+(anónimo) @ sw.js:65
+Promise.catch
+(anónimo) @ sw.js:63
+Promise.then
+(anónimo) @ sw.js:49
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:65 [Service Worker] Network request failed and asset is not cached: http://localhost:4200/
+(anónimo) @ sw.js:65
+Promise.catch
+(anónimo) @ sw.js:63
+Promise.then
+(anónimo) @ sw.js:49
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:65 [Service Worker] Network request failed and asset is not cached: http://localhost:4200/
+(anónimo) @ sw.js:65
+Promise.catch
+(anónimo) @ sw.js:63
+Promise.then
+(anónimo) @ sw.js:49
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:65 [Service Worker] Network request failed and asset is not cached: http://localhost:4200/
+(anónimo) @ sw.js:65
+Promise.catch
+(anónimo) @ sw.js:63
+Promise.then
+(anónimo) @ sw.js:49
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:65 [Service Worker] Network request failed and asset is not cached: http://localhost:4200/
+(anónimo) @ sw.js:65
+Promise.catch
+(anónimo) @ sw.js:63
+Promise.then
+(anónimo) @ sw.js:49
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:65 [Service Worker] Network request failed and asset is not cached: http://localhost:4200/
+(anónimo) @ sw.js:65
+Promise.catch
+(anónimo) @ sw.js:63
+Promise.then
+(anónimo) @ sw.js:49
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:65 [Service Worker] Network request failed and asset is not cached: http://localhost:4200/
+(anónimo) @ sw.js:65
+Promise.catch
+(anónimo) @ sw.js:63
+Promise.then
+(anónimo) @ sw.js:49
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:65 [Service Worker] Network request failed and asset is not cached: http://localhost:4200/
+(anónimo) @ sw.js:65
+Promise.catch
+(anónimo) @ sw.js:63
+Promise.then
+(anónimo) @ sw.js:49
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:65 [Service Worker] Network request failed and asset is not cached: http://localhost:4200/
+(anónimo) @ sw.js:65
+Promise.catch
+(anónimo) @ sw.js:63
+Promise.then
+(anónimo) @ sw.js:49
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:65 [Service Worker] Network request failed and asset is not cached: http://localhost:4200/
+(anónimo) @ sw.js:65
+Promise.catch
+(anónimo) @ sw.js:63
+Promise.then
+(anónimo) @ sw.js:49
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:65 [Service Worker] Network request failed and asset is not cached: http://localhost:4200/
+(anónimo) @ sw.js:65
+Promise.catch
+(anónimo) @ sw.js:63
+Promise.then
+(anónimo) @ sw.js:49
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:65 [Service Worker] Network request failed and asset is not cached: http://localhost:4200/
+(anónimo) @ sw.js:65
+Promise.catch
+(anónimo) @ sw.js:63
+Promise.then
+(anónimo) @ sw.js:49
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:65 [Service Worker] Network request failed and asset is not cached: http://localhost:4200/
+(anónimo) @ sw.js:65
+Promise.catch
+(anónimo) @ sw.js:63
+Promise.then
+(anónimo) @ sw.js:49
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:65 [Service Worker] Network request failed and asset is not cached: http://localhost:4200/
+(anónimo) @ sw.js:65
+Promise.catch
+(anónimo) @ sw.js:63
+Promise.then
+(anónimo) @ sw.js:49
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:65 [Service Worker] Network request failed and asset is not cached: http://localhost:4200/
+(anónimo) @ sw.js:65
+Promise.catch
+(anónimo) @ sw.js:63
+Promise.then
+(anónimo) @ sw.js:49
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:65 [Service Worker] Network request failed and asset is not cached: http://localhost:4200/
+(anónimo) @ sw.js:65
+Promise.catch
+(anónimo) @ sw.js:63
+Promise.then
+(anónimo) @ sw.js:49
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:65 [Service Worker] Network request failed and asset is not cached: http://localhost:4200/
+(anónimo) @ sw.js:65
+Promise.catch
+(anónimo) @ sw.js:63
+Promise.then
+(anónimo) @ sw.js:49
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:65 [Service Worker] Network request failed and asset is not cached: http://localhost:4200/
+(anónimo) @ sw.js:65
+Promise.catch
+(anónimo) @ sw.js:63
+Promise.then
+(anónimo) @ sw.js:49
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:65 [Service Worker] Network request failed and asset is not cached: http://localhost:4200/
+(anónimo) @ sw.js:65
+Promise.catch
+(anónimo) @ sw.js:63
+Promise.then
+(anónimo) @ sw.js:49
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:65 [Service Worker] Network request failed and asset is not cached: http://localhost:4200/
+(anónimo) @ sw.js:65
+Promise.catch
+(anónimo) @ sw.js:63
+Promise.then
+(anónimo) @ sw.js:49
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:65 [Service Worker] Network request failed and asset is not cached: http://localhost:4200/
+(anónimo) @ sw.js:65
+Promise.catch
+(anónimo) @ sw.js:63
+Promise.then
+(anónimo) @ sw.js:49
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:65 [Service Worker] Network request failed and asset is not cached: http://localhost:4200/
+(anónimo) @ sw.js:65
+Promise.catch
+(anónimo) @ sw.js:63
+Promise.then
+(anónimo) @ sw.js:49
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:65 [Service Worker] Network request failed and asset is not cached: http://localhost:4200/
+(anónimo) @ sw.js:65
+Promise.catch
+(anónimo) @ sw.js:63
+Promise.then
+(anónimo) @ sw.js:49
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:65 [Service Worker] Network request failed and asset is not cached: http://localhost:4200/
+(anónimo) @ sw.js:65
+Promise.catch
+(anónimo) @ sw.js:63
+Promise.then
+(anónimo) @ sw.js:49
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:65 [Service Worker] Network request failed and asset is not cached: http://localhost:4200/
+(anónimo) @ sw.js:65
+Promise.catch
+(anónimo) @ sw.js:63
+Promise.then
+(anónimo) @ sw.js:49
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:65 [Service Worker] Network request failed and asset is not cached: http://localhost:4200/
+(anónimo) @ sw.js:65
+Promise.catch
+(anónimo) @ sw.js:63
+Promise.then
+(anónimo) @ sw.js:49
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:65 [Service Worker] Network request failed and asset is not cached: http://localhost:4200/
+(anónimo) @ sw.js:65
+Promise.catch
+(anónimo) @ sw.js:63
+Promise.then
+(anónimo) @ sw.js:49
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:65 [Service Worker] Network request failed and asset is not cached: http://localhost:4200/
+(anónimo) @ sw.js:65
+Promise.catch
+(anónimo) @ sw.js:63
+Promise.then
+(anónimo) @ sw.js:49
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:65 [Service Worker] Network request failed and asset is not cached: http://localhost:4200/
+(anónimo) @ sw.js:65
+Promise.catch
+(anónimo) @ sw.js:63
+Promise.then
+(anónimo) @ sw.js:49
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:65 [Service Worker] Network request failed and asset is not cached: http://localhost:4200/
+(anónimo) @ sw.js:65
+Promise.catch
+(anónimo) @ sw.js:63
+Promise.then
+(anónimo) @ sw.js:49
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:65 [Service Worker] Network request failed and asset is not cached: http://localhost:4200/
+(anónimo) @ sw.js:65
+Promise.catch
+(anónimo) @ sw.js:63
+Promise.then
+(anónimo) @ sw.js:49
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:65 [Service Worker] Network request failed and asset is not cached: http://localhost:4200/
+(anónimo) @ sw.js:65
+Promise.catch
+(anónimo) @ sw.js:63
+Promise.then
+(anónimo) @ sw.js:49
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:65 [Service Worker] Network request failed and asset is not cached: http://localhost:4200/
+(anónimo) @ sw.js:65
+Promise.catch
+(anónimo) @ sw.js:63
+Promise.then
+(anónimo) @ sw.js:49
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:65 [Service Worker] Network request failed and asset is not cached: http://localhost:4200/
+(anónimo) @ sw.js:65
+Promise.catch
+(anónimo) @ sw.js:63
+Promise.then
+(anónimo) @ sw.js:49
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:65 [Service Worker] Network request failed and asset is not cached: http://localhost:4200/
+(anónimo) @ sw.js:65
+Promise.catch
+(anónimo) @ sw.js:63
+Promise.then
+(anónimo) @ sw.js:49
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:65 [Service Worker] Network request failed and asset is not cached: http://localhost:4200/
+(anónimo) @ sw.js:65
+Promise.catch
+(anónimo) @ sw.js:63
+Promise.then
+(anónimo) @ sw.js:49
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:65 [Service Worker] Network request failed and asset is not cached: http://localhost:4200/
+(anónimo) @ sw.js:65
+Promise.catch
+(anónimo) @ sw.js:63
+Promise.then
+(anónimo) @ sw.js:49
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+sw.js:1 Uncaught (in promise) TypeError: Failed to convert value to 'Response'.
+?plugins=forms,container-queries:64 cdn.tailwindcss.com should not be used in production. To use Tailwind CSS in production, install it as a PostCSS plugin or use the Tailwind CLI: https://tailwindcss.com/docs/installation
+(anónimo) @ ?plugins=forms,container-queries:64
+:4200/:1  Failed to load resource: net::ERR_CONNECTION_REFUSED
+(índice):2480 🤟 [SIGN.MT] Service at localhost:4200 warming up. Retrying... (20 attempts left)
+(anónimo) @ (índice):2480
+app.js?v=6:1819 🟢 Inclusive Communication Hub - Web Portal initialized
+(índice):1510 🔊 [Azure TTS] VB-Audio Cable detected: CABLE Input (VB-Audio Virtual Cable) → Dual output enabled
+(índice):1009 ✅ Auto-selected VB-Audio Cable for Remote Input: 1682eb6c694b9a8744eb35488bc90dc004ea9152f58cecb63a256778359c1f8c
+vision_wasm_internal.js:9 W0328 05:27:20.458000 1819728 gesture_recognizer_graph.cc:134] Hand Gesture Recognizer contains CPU only ops. Sets HandGestureRecognizerGraph acceleration to Xnnpack.
+custom_dbg @ vision_wasm_internal.js:9
+vision_wasm_internal.js:9 I0328 05:27:20.460000 1819728 hand_gesture_recognizer_graph.cc:256] Custom gesture classifier is not defined.
+vision_wasm_internal.js:9 I0328 05:27:20.515000 1819728 gl_context.cc:359] GL version: 3.0 (OpenGL ES 3.0 (WebGL 2.0 (OpenGL ES 3.0 Chromium))), renderer: WebKit WebGL
+vision_wasm_internal.js:9 W0328 05:27:20.515000 1819728 gl_context.cc:1002] OpenGL error checking is disabled
+custom_dbg @ vision_wasm_internal.js:9
+vision_wasm_internal.js:9 Graph successfully started running.
+app.js?v=6:1889 MediaPipe Gesture Engine initialized.
+(índice):2841 ✅ ServiceWorker registration successful - Edge AI Caching Active (Scope: https://localhost:49938/)
+:49938/favicon.ico:1  Failed to load resource: the server responded with a status of 404 ()
+:4200/:1  Failed to load resource: net::ERR_CONNECTION_REFUSED
+(índice):2480 🤟 [SIGN.MT] Service at localhost:4200 warming up. Retrying... (19 attempts left)
+(anónimo) @ (índice):2480
+:4200/:1  Failed to load resource: net::ERR_CONNECTION_REFUSED
+(índice):2480 🤟 [SIGN.MT] Service at localhost:4200 warming up. Retrying... (18 attempts left)
+(anónimo) @ (índice):2480
+(índice):1 Unsafe attempt to load URL http://localhost:4200/translate from frame with URL chrome-error://chromewebdata/. Domains, protocols and ports must match.
+
+(índice):2466  GET http://localhost:4200/ net::ERR_CONNECTION_REFUSED
+checkSignIframe @ (índice):2466
+(anónimo) @ (índice):2481
+(índice):2480 🤟 [SIGN.MT] Service at localhost:4200 warming up. Retrying... (17 attempts left)
+(anónimo) @ (índice):2480
+Promise.catch
+checkSignIframe @ (índice):2478
+(anónimo) @ (índice):2481

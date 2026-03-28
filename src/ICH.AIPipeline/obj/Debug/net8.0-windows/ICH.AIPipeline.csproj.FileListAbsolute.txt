@@ -1,0 +1,17 @@
+D:\FREELANCE\COMPETENCIAS\Innovation Challenge - 2026 March 2\src\ICH.AIPipeline\bin\Debug\net8.0-windows\ICH.AIPipeline.deps.json
+D:\FREELANCE\COMPETENCIAS\Innovation Challenge - 2026 March 2\src\ICH.AIPipeline\bin\Debug\net8.0-windows\ICH.AIPipeline.dll
+D:\FREELANCE\COMPETENCIAS\Innovation Challenge - 2026 March 2\src\ICH.AIPipeline\bin\Debug\net8.0-windows\ICH.AIPipeline.pdb
+D:\FREELANCE\COMPETENCIAS\Innovation Challenge - 2026 March 2\src\ICH.AIPipeline\bin\Debug\net8.0-windows\ICH.AudioEngine.dll
+D:\FREELANCE\COMPETENCIAS\Innovation Challenge - 2026 March 2\src\ICH.AIPipeline\bin\Debug\net8.0-windows\ICH.Shared.dll
+D:\FREELANCE\COMPETENCIAS\Innovation Challenge - 2026 March 2\src\ICH.AIPipeline\bin\Debug\net8.0-windows\ICH.Shared.pdb
+D:\FREELANCE\COMPETENCIAS\Innovation Challenge - 2026 March 2\src\ICH.AIPipeline\bin\Debug\net8.0-windows\ICH.AudioEngine.pdb
+D:\FREELANCE\COMPETENCIAS\Innovation Challenge - 2026 March 2\src\ICH.AIPipeline\obj\Debug\net8.0-windows\ICH.AIPipeline.csproj.AssemblyReference.cache
+D:\FREELANCE\COMPETENCIAS\Innovation Challenge - 2026 March 2\src\ICH.AIPipeline\obj\Debug\net8.0-windows\ICH.AIPipeline.GeneratedMSBuildEditorConfig.editorconfig
+D:\FREELANCE\COMPETENCIAS\Innovation Challenge - 2026 March 2\src\ICH.AIPipeline\obj\Debug\net8.0-windows\ICH.AIPipeline.AssemblyInfoInputs.cache
+D:\FREELANCE\COMPETENCIAS\Innovation Challenge - 2026 March 2\src\ICH.AIPipeline\obj\Debug\net8.0-windows\ICH.AIPipeline.AssemblyInfo.cs
+D:\FREELANCE\COMPETENCIAS\Innovation Challenge - 2026 March 2\src\ICH.AIPipeline\obj\Debug\net8.0-windows\ICH.AIPipeline.csproj.CoreCompileInputs.cache
+D:\FREELANCE\COMPETENCIAS\Innovation Challenge - 2026 March 2\src\ICH.AIPipeline\obj\Debug\net8.0-windows\ICH.AIPi.206C962E.Up2Date
+D:\FREELANCE\COMPETENCIAS\Innovation Challenge - 2026 March 2\src\ICH.AIPipeline\obj\Debug\net8.0-windows\ICH.AIPipeline.dll
+D:\FREELANCE\COMPETENCIAS\Innovation Challenge - 2026 March 2\src\ICH.AIPipeline\obj\Debug\net8.0-windows\refint\ICH.AIPipeline.dll
+D:\FREELANCE\COMPETENCIAS\Innovation Challenge - 2026 March 2\src\ICH.AIPipeline\obj\Debug\net8.0-windows\ICH.AIPipeline.pdb
+D:\FREELANCE\COMPETENCIAS\Innovation Challenge - 2026 March 2\src\ICH.AIPipeline\obj\Debug\net8.0-windows\ref\ICH.AIPipeline.dll

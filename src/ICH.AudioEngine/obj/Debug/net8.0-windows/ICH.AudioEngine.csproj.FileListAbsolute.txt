@@ -1,0 +1,15 @@
+D:\FREELANCE\COMPETENCIAS\Innovation Challenge - 2026 March 2\src\ICH.AudioEngine\bin\Debug\net8.0-windows\ICH.AudioEngine.deps.json
+D:\FREELANCE\COMPETENCIAS\Innovation Challenge - 2026 March 2\src\ICH.AudioEngine\bin\Debug\net8.0-windows\ICH.AudioEngine.dll
+D:\FREELANCE\COMPETENCIAS\Innovation Challenge - 2026 March 2\src\ICH.AudioEngine\bin\Debug\net8.0-windows\ICH.AudioEngine.pdb
+D:\FREELANCE\COMPETENCIAS\Innovation Challenge - 2026 March 2\src\ICH.AudioEngine\bin\Debug\net8.0-windows\ICH.Shared.dll
+D:\FREELANCE\COMPETENCIAS\Innovation Challenge - 2026 March 2\src\ICH.AudioEngine\bin\Debug\net8.0-windows\ICH.Shared.pdb
+D:\FREELANCE\COMPETENCIAS\Innovation Challenge - 2026 March 2\src\ICH.AudioEngine\obj\Debug\net8.0-windows\ICH.AudioEngine.csproj.AssemblyReference.cache
+D:\FREELANCE\COMPETENCIAS\Innovation Challenge - 2026 March 2\src\ICH.AudioEngine\obj\Debug\net8.0-windows\ICH.AudioEngine.GeneratedMSBuildEditorConfig.editorconfig
+D:\FREELANCE\COMPETENCIAS\Innovation Challenge - 2026 March 2\src\ICH.AudioEngine\obj\Debug\net8.0-windows\ICH.AudioEngine.AssemblyInfoInputs.cache
+D:\FREELANCE\COMPETENCIAS\Innovation Challenge - 2026 March 2\src\ICH.AudioEngine\obj\Debug\net8.0-windows\ICH.AudioEngine.AssemblyInfo.cs
+D:\FREELANCE\COMPETENCIAS\Innovation Challenge - 2026 March 2\src\ICH.AudioEngine\obj\Debug\net8.0-windows\ICH.AudioEngine.csproj.CoreCompileInputs.cache
+D:\FREELANCE\COMPETENCIAS\Innovation Challenge - 2026 March 2\src\ICH.AudioEngine\obj\Debug\net8.0-windows\ICH.Audi.01D524DD.Up2Date
+D:\FREELANCE\COMPETENCIAS\Innovation Challenge - 2026 March 2\src\ICH.AudioEngine\obj\Debug\net8.0-windows\ICH.AudioEngine.dll
+D:\FREELANCE\COMPETENCIAS\Innovation Challenge - 2026 March 2\src\ICH.AudioEngine\obj\Debug\net8.0-windows\refint\ICH.AudioEngine.dll
+D:\FREELANCE\COMPETENCIAS\Innovation Challenge - 2026 March 2\src\ICH.AudioEngine\obj\Debug\net8.0-windows\ICH.AudioEngine.pdb
+D:\FREELANCE\COMPETENCIAS\Innovation Challenge - 2026 March 2\src\ICH.AudioEngine\obj\Debug\net8.0-windows\ref\ICH.AudioEngine.dll

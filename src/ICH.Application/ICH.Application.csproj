@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>ICH.Application</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="MediatR" Version="12.4.1" />
+    <PackageReference Include="FluentValidation" Version="11.10.0" />
+    <PackageReference Include="AutoMapper" Version="16.1.1" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ICH.Domain\ICH.Domain.csproj" />
+    <ProjectReference Include="..\ICH.Shared\ICH.Shared.csproj" />
+  </ItemGroup>
+</Project>

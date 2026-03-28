@@ -1,0 +1,11 @@
+D:\FREELANCE\COMPETENCIAS\Innovation Challenge - 2026 March 2\src\ICH.Shared\bin\Debug\net8.0\ICH.Shared.deps.json
+D:\FREELANCE\COMPETENCIAS\Innovation Challenge - 2026 March 2\src\ICH.Shared\bin\Debug\net8.0\ICH.Shared.dll
+D:\FREELANCE\COMPETENCIAS\Innovation Challenge - 2026 March 2\src\ICH.Shared\bin\Debug\net8.0\ICH.Shared.pdb
+D:\FREELANCE\COMPETENCIAS\Innovation Challenge - 2026 March 2\src\ICH.Shared\obj\Debug\net8.0\ICH.Shared.GeneratedMSBuildEditorConfig.editorconfig
+D:\FREELANCE\COMPETENCIAS\Innovation Challenge - 2026 March 2\src\ICH.Shared\obj\Debug\net8.0\ICH.Shared.AssemblyInfoInputs.cache
+D:\FREELANCE\COMPETENCIAS\Innovation Challenge - 2026 March 2\src\ICH.Shared\obj\Debug\net8.0\ICH.Shared.AssemblyInfo.cs
+D:\FREELANCE\COMPETENCIAS\Innovation Challenge - 2026 March 2\src\ICH.Shared\obj\Debug\net8.0\ICH.Shared.csproj.CoreCompileInputs.cache
+D:\FREELANCE\COMPETENCIAS\Innovation Challenge - 2026 March 2\src\ICH.Shared\obj\Debug\net8.0\ICH.Shared.dll
+D:\FREELANCE\COMPETENCIAS\Innovation Challenge - 2026 March 2\src\ICH.Shared\obj\Debug\net8.0\refint\ICH.Shared.dll
+D:\FREELANCE\COMPETENCIAS\Innovation Challenge - 2026 March 2\src\ICH.Shared\obj\Debug\net8.0\ICH.Shared.pdb
+D:\FREELANCE\COMPETENCIAS\Innovation Challenge - 2026 March 2\src\ICH.Shared\obj\Debug\net8.0\ref\ICH.Shared.dll

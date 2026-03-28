@@ -1,0 +1,40 @@
+<?xml version = "1.0" encoding = "UTF-8" ?>
+<Application xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="ICH.MauiApp.App">
+    <Application.Resources>
+        <ResourceDictionary>
+            <!-- Inclusive Hub Dark Theme -->
+            <Color x:Key="Background">#0b1326</Color>
+            <Color x:Key="Surface">#0b1326</Color>
+            <Color x:Key="SurfaceContainer">#171f33</Color>
+            <Color x:Key="SurfaceContainerHigh">#222a3d</Color>
+            <Color x:Key="SurfaceContainerHighest">#2d3449</Color>
+            <Color x:Key="Primary">#00dce6</Color>
+            <Color x:Key="PrimaryContainer">#00838a</Color>
+            <Color x:Key="OnSurface">#dae2fd</Color>
+            <Color x:Key="Secondary">#b8c7e2</Color>
+            <Color x:Key="Tertiary">#fbbc00</Color>
+            <Color x:Key="ErrorColor">#ffb4ab</Color>
+            <Color x:Key="OutlineVariant">#404752</Color>
+
+            <Style TargetType="Label" x:Key="HeadingStyle">
+                <Setter Property="TextColor" Value="{StaticResource OnSurface}" />
+                <Setter Property="FontSize" Value="24" />
+                <Setter Property="FontAttributes" Value="Bold" />
+            </Style>
+            <Style TargetType="Label" x:Key="SubtitleStyle">
+                <Setter Property="TextColor" Value="{StaticResource Secondary}" />
+                <Setter Property="FontSize" Value="18" />
+            </Style>
+            <Style TargetType="Label" x:Key="BodyStyle">
+                <Setter Property="TextColor" Value="{StaticResource OnSurface}" />
+                <Setter Property="FontSize" Value="14" />
+            </Style>
+            <Style TargetType="Label" x:Key="MutedStyle">
+                <Setter Property="TextColor" Value="#8a919e" />
+                <Setter Property="FontSize" Value="12" />
+            </Style>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

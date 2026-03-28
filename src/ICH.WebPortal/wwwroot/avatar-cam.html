@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ICH - Sign Language Avatar</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            background: #131b2e; /* Same as main hub */
+            overflow: hidden; 
+            display: flex; 
+            flex-direction: column; 
+            height: 100vh;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+        .header {
+            background: #0b1120;
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(0, 220, 230, 0.3);
+            z-index: 50;
+        }
+        .header-title {
+            color: #00dce6;
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .header-title::before {
+            content: '●'; color: #00dce6; animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse { 0%,100% {opacity:1;} 50% {opacity:0.4;} }
+        
+        /* The container must match the main app's layout logic */
+        .viewport-container {
+            flex: 1;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+        }
+        iframe { 
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            border: none; 
+            pointer-events: auto;
+        }
+        
+        .bg-options {
+            background: #0b1120;
+            padding: 8px 16px;
+            display: flex; gap: 12px; align-items: center;
+            border-top: 1px solid rgba(45,52,73,0.5);
+            z-index: 50;
+            position: relative;
+        }
+        .bg-btn {
+            width: 24px; height: 24px; border-radius: 4px; border: 2px solid transparent; cursor: pointer;
+        }
+        .bg-btn.active { border-color: #00dce6; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <span class="header-title">Virtual Sign Cam — LIVE</span>
+        <span style="color:#64748b; font-size:10px;">Share this window in Zoom/Meet</span>
+    </div>
+    <div class="viewport-container" id="vp">
+        <!-- Lightweight Receiver. No heavy Angular/ML engines are loaded here. -->
+        <video id="vid" autoplay playsinline muted style="width:100%; height:100%; object-fit:contain;"></video>
+    </div>
+    <div class="bg-options">
+        <span style="color:#64748b; font-size:10px; font-weight:bold;">BACKGROUND:</span>
+        <div class="bg-btn active" style="background:#131b2e;" onclick="setBg(this, '#131b2e')"></div>
+        <div class="bg-btn" style="background:#00b140;" onclick="setBg(this, '#00b140')"></div>
+        <div class="bg-btn" style="background:#0047ff;" onclick="setBg(this, '#0047ff')"></div>
+        <div class="bg-btn" style="background:#ffffff;" onclick="setBg(this, '#ffffff')"></div>
+        <div class="bg-btn" style="background:#000000;" onclick="setBg(this, '#000000')"></div>
+    </div>
+    
+    <script>
+        function setBg(el, color) {
+            document.body.style.background = color;
+            document.getElementById('vp').style.background = color;
+            Array.from(document.querySelectorAll('.bg-btn')).forEach(b => b.classList.remove('active'));
+            el.classList.add('active');
+        }
+
+        // Parent window will inject the MediaStream track directly 
+        // because this is a Same-Origin window. If it's ready, we notify the parent.
+        if (window.opener) {
+            setTimeout(() => {
+                window.opener.postMessage({ type: 'POPUP_READY' }, '*');
+            }, 100);
+        }
+    </script>
+</body>
+</html>

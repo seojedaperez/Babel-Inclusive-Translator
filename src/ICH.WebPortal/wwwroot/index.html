@@ -115,6 +115,12 @@
       .wave-bar.animated {
         animation: waveBar 1.2s ease-in-out infinite;
       }
+      /* Custom Scrollbar for View Sections */
+      .custom-scrollbar::-webkit-scrollbar { width: 8px; }
+      .custom-scrollbar::-webkit-scrollbar-track { background: transparent; border-radius: 10px; }
+      .custom-scrollbar::-webkit-scrollbar-thumb { background: #2d3449; border-radius: 10px; border: 2px solid #0b1326; }
+      .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #00dce6; }
+
       /* Transcript scroll area */
       #transcript-log {
         max-height: 200px;
@@ -139,7 +145,7 @@
         window.FilesetResolver = FilesetResolver;
     </script>
 </head>
-<body class="bg-background text-on-background font-body selection:bg-primary/30 min-h-screen flex overflow-hidden">
+<body class="bg-background text-on-background font-body selection:bg-primary/30 h-screen flex overflow-hidden">
 <!-- SideNavBar -->
 <aside class="flex flex-col h-full sticky top-0 left-0 h-screen w-64 border-r border-[#2d3449]/30 bg-[#131b2e]/60 backdrop-blur-xl font-['Inter'] antialiased tracking-tight shadow-[48px_0_48px_rgba(45,52,73,0.4)] z-[60]">
 <div class="p-6">
@@ -190,7 +196,7 @@
 </div>
 </aside>
 <!-- Main Viewport -->
-<main class="flex-1 flex flex-col min-w-0 bg-surface">
+<main class="flex-1 flex flex-col min-w-0 min-h-0 bg-surface">
 <!-- TopNavBar -->
 <header class="flex justify-between items-center px-8 w-full sticky top-0 z-50 w-full h-16 border-b border-[#2d3449]/20 bg-[#0b1326]/80 backdrop-blur-md font-['Inter'] font-medium text-sm">
 <div class="flex items-center gap-6">

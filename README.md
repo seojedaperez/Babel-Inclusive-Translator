@@ -1,5 +1,3 @@
-<![CDATA[# 🎧 Inclusive Communication Hub (ICH)
-
 **System-Level AI Assistant for Real-Time Audio Translation & Accessibility**
 
 > A background service similar to NVIDIA Broadcast that captures system audio and microphone input, processes it with AI, and outputs translated audio streams, live subtitles, and sign language visualization — all in real time.
@@ -604,4 +602,4 @@ MIT License - See [LICENSE](LICENSE) for details.
   <strong>🌍 Breaking Language Barriers with AI</strong><br>
   <em>Making communication accessible for everyone, everywhere.</em>
 </p>
-]]>
+
